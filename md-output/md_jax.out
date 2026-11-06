@@ -1,0 +1,10 @@
+# wmi_md_jax M2 MD log  devices=[gpu(id=0)]
+neighbor pairs: 3354520, padded capacity: 4193150
+Initial classical PE: 3414.4507 kcal/mol
+  step             PE           KE             TE    ms/step
+    10      3414.6104    7661.5807     11076.1911      963.3
+    20      3499.6967    7723.0624     11222.7591      806.4
+    30      3588.9041    7809.0044     11397.9085      806.8
+    40      3674.4477    7907.3333     11581.7810      811.8
+    50      3833.8866    7937.8932     11771.7798      809.6
+=== done: 42.0s total, 839.6 ms/step avg ===

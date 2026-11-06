@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=wmi_md_jax
+#SBATCH --time=1:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=40
+#SBATCH --gpus-per-node=1
+#SBATCH --account=PYS1137
+#SBATCH --mail-type=FAIL,END
+#SBATCH --mail-user=cherrydons@gmail.com
+#SBATCH -o md_m2.out
+#SBATCH -e md_m2.err
+
+# Full classical APPLE&P MD (M2) in the JAX engine.
+# EDIT THIS ONE LINE: the folder that contains md-input/, pkg/, md-output/, wmi_md_jax/
+
+module load miniconda3/24.1.2-py310
+eval "$(conda shell.bash hook)"
+conda activate newenv2
+module load cuda/11.8.0
+
+python -m wmi_md_jax.main_m2 --input-dir ./md-input --ref-dir ./pkg \
+    --steps 50 --print-every 10 --fp32 --out md-output/md_jax.out

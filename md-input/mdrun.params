@@ -1,0 +1,63 @@
+*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*                       SIMULATION PARAMETERS
+*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*1  ---- Ensemble control variables
+* NVE (microcanonical) NVT (canonical) NPT (isothermal-isobaric) Anisotropic
+  .false.               .true.         .false.                   .false.
+*
+*2  ----  Dispersive interaction and integration control
+* Cutoff Radius    Max"Drift"     Delta(fs)   Number of steps
+ 12.0             1.0            0.5         200
+*
+*3  ---- Thermostat
+* Temperature (K)  Num_NHC  OmegaQ (1/fs)
+ 296.15           1        0.01
+*
+*4  ---- Barostat
+*Pressure Setpoint (atm) Allow Box Rescaling? Average Pressure?  OmegaW(1/fs)
+*    X      Y      Z         X    Y    Z          X   Y   Z
+    1.0    1.0    1.0        T    T    T          T   T   T         0.0005
+*
+*XXX ---- Static Polarization Model [No Longer Used - Do Not Change (DNC) ]
+* Do Not Change  Do Not Change  Do Not Change  Do Not Change   Do Not Change
+ .false.         13.0           14.5           50.0            4.5
+*
+*5  ---- Statistic collection and output control
+* Initialize(fs)  Average(fs)  Pressure(fs)  Energy Split(fs)  Coord Output(fs)
+  30.0             150.0         150.0         1000000           1
+*
+*------- Trajectory file settings
+*6  ----   Trajectory Output Flags (Filenames: fort.XX)
+* BoxDipole(76)   Coordinates(77)   Stress Tensor(78)   Velocities(79)
+ .false.           .TRUE.            .false.              .false.
+*7  ----   Trajectory Output Frequency (femtoseconds)
+* Dipole Time      Coordinate Time   Stress Time        Velocity Time
+  100              1              3                  1500
+*
+*7  ---- System Adjustment and Debugging
+* Resize Box?      Target Box Size   Output Additional Information?
+  .false.          50.00  50.00  50.00    .false.
+*
+*8  ----  Interaction control
+* Calc Intermolecular?   Exclude 1-4?      Isokinetic Ensemble?
+  .TRUE.                 .false.           .true.
+*
+*9  ----  1-4 Interaction Scaling
+* Reduce 1-4(Exc. mu-mu)  Reduce 1-4 Factor  Reduce Q-mu 1-4  Red. Q-mu Factor
+  .false.                 0.0                .TRUE.           0.8
+*
+*10 ----  Bond constraints (SHAKE Algorithm)
+* Constrain Bonds?     Tolerance (SHAKE)
+  .TRUE.                  1.e-4
+*
+*11 ----  Long range electrostatic calculation (Ewald Sum)
+* Electrostatic Calculation Type      Alpha      Maximum K Vector  Enable
+  Ewald                               0.23       7   7   7         .TRUE.
+*
+*12 ----  Integrator control
+* Integrator Type     Medium Steps   Large Steps   Small Timestep Cutoff
+  Multiple3           1              1               8
+*
+*13 ----  Many body polarization control
+* Q-mu    mu-mu     |  Polarization Tol.  Tapering   Taper Start  Epsilon(RF)
+  Ewald   RF/Taper  |  1.0e-4             .TRUE.     14.5          1.0

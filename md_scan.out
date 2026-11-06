@@ -1,0 +1,66 @@
+# wmi_md_jax M4 scan log  devices=[gpu(id=0)]
+Loading system (reference setup)...
+File: mdrun.params has been read
+File: ff.dat has been read
+No temp.ramp file found - temperature ramping disabled
+File: connectivity.dat has been read
+  nat=8716, nbonds=8324, nbends=12628, ntorts=12696, ndeforms=0
+File: coords.inp has been read
+  ndummy = 1316, natreal = 7400
+Total charge = 0.000000
+Initializing connectivity for 1316 dummy atoms...
+  Initialized jikdummy for 1316 dummy atoms
+
+  Starting lone pair pairing...
+  Found 640 type-2 and 0 type-3 dummies
+  Successfully paired 640 sets of lone pairs
+  Lone pair pairing completed
+
+Building neighbor lists...
+
+  Computing spline coefficients (JIT-accelerated)...
+    maxnnb = 136, numpoints = 479, deltaspline = 0.3000
+    Grid values:      0.82 s
+    Solve pieces:     0.56 s
+    Assemble:         0.81 s
+    Total:            2.19 s  (was ~250 s)
+
+  ========================================
+  SHAKE CONSTRAINTS INITIALIZED
+  ========================================
+  Total bonds:       8324
+  Constrained bonds: 7008
+  Tolerance:         1.00e-06
+  Max iterations:    100
+  ========================================
+
+  Polarization initialized:
+    a_thole = 0.2, arf = 0.000000
+    rtaper = 14.5, ro = 12.0, tauden = -2.604167e+00
+    tolpol = 0.0001
+  [GPU] Reciprocal E-field on Tesla V100-PCIE-16GB: 709 k-vectors
+  [GPU] Pair builder on Tesla V100-PCIE-16GB: ready (refresh_static needed)
+  [GPU] 1-4 correction enabled: max_l14 = 6
+  Polarization SCF: 4 iterations, RMS(mu) = 5.698944e-02
+
+  Degrees of freedom:  15192
+  Bond energy:               0.0027 kcal/mol
+  Bend energy:            5582.3471 kcal/mol
+  Torsion energy:         -180.0158 kcal/mol
+  van der Waals:           611.2592 kcal/mol
+  Electrostatic:         -2599.1412 kcal/mol
+  Polarization:          -7025.9875 kcal/mol
+  Potential energy:      -3611.5355 kcal/mol
+  Kinetic energy:         7601.9979 kcal/mol
+  Total energy:           3990.4624 kcal/mol
+  Temperature:               503.65 K
+  loaded in 106.7s  nat=8716 ndummy=1316
+neighbor pairs: 3354520, padded capacity: 4193150
+polarization: ENABLED (full induced-dipole SCF each step)
+Initial polarizable PE: -3611.5363 kcal/mol
+  step             PE           KE             TE    ms/step
+    50     -3315.5952    8097.6595      4782.0644       53.4
+   100     -2648.8495    8693.6035      6044.7540       56.8
+   150     -2314.7604    9182.1194      6867.3591       55.7
+   200     -1830.3790    9397.7178      7567.3388       58.4
+=== done: 11.2s total, 56.1 ms/step avg ===
