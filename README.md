@@ -7,7 +7,7 @@ the science stack, so the polarization SCF can later be replaced by ML
 (roadmap step 3).
 
 Target system: PEO polymer electrolyte, Li⁺ + FSI⁻, **8,716 sites** (7,400 atoms
-+ 1,316 lone-pair/dummy sites). Hardware: OSC Pitzer, Tesla V100-PCIE-16GB,
++ 1,316 lone-pair/dummy sites). Hardware: Tesla V100-PCIE-16GB,
 conda env `newenv2`, JAX 0.4.13 / jaxlib 0.4.12, CUDA 11.8, Python 3.8.
 
 ---
