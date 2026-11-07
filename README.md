@@ -1,7 +1,7 @@
 # GOMD — Complete Technical Documentation
 
 **GOMD (GPU-accelerated Open MD)** is a from-scratch JAX/GPU molecular dynamics
-engine for the **APPLE&P polarizable force field**. It reproduces a validated
+engine for the **APPLE&P polarizable force field** or equivalance. It reproduces a validated
 Python/Fortran reference (kept in `pkg/`) bit-for-bit and owns every layer of
 the science stack, so the polarization SCF can later be replaced by ML
 (roadmap step 3).
@@ -17,7 +17,7 @@ conda env `newenv2`, JAX 0.4.13 / jaxlib 0.4.12, CUDA 11.8, Python 3.8.
 | Milestone | What | State |
 |-----------|------|-------|
 | M1 | JAX scaffold (pytree state, velocity Verlet) | done (scaffold code retired) |
-| M2 | Full **classical** APPLE&P MD | done, validated |
+| M2 | Full **classical** polarizable MD | done, validated |
 | M3 | **Polarization** — field, SCF, energy, forces — wired into the step loop | done, validated |
 | M4 | Performance: on-device neighbor list, `lax.scan` loop, `segment_sum` pair kernel | done |
 
