@@ -1,7 +1,7 @@
 # GOMD — Complete Technical Documentation
 
 **GOMD (GPU-accelerated Open MD)** is a from-scratch JAX/GPU molecular dynamics
-engine for the **APPLE&P polarizable force field** or equivalance. It reproduces a validated
+engine for the polarizable force field (like APPLE&P, AMOEBA, MU-PFF or equivalance). It reproduces a validated
 Python/Fortran reference (kept in `pkg/`) bit-for-bit and owns every layer of
 the science stack, so the polarization SCF can later be replaced by ML
 (roadmap step 3).
