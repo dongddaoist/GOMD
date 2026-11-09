@@ -2,7 +2,7 @@
 
 **GOMD (GPU-accelerated Open MD)** is a from-scratch JAX/GPU molecular dynamics
 engine for the polarizable force field (like APPLE&P, AMOEBA, MU-PFF or equivalance). It reproduces a validated
-Python/Fortran reference (kept in `pkg/`) bit-for-bit and owns every layer of
+Python reference (kept in `pkg/`) bit-for-bit and owns every layer of
 the science stack, so the polarization SCF can later be replaced by ML
 (roadmap step 3).
 
@@ -77,7 +77,7 @@ reference parsers and `setup_system` once, then everything per-step is pure JAX.
    as functional dependencies because roadmap step 3 requires surgically
    replacing the SCF with ML — you cannot swap code you do not own.
 2. **Validate bit-for-bit against the reference.** Every component is checked
-   against the Python/Fortran reference on the real 8,716-site system. The bar
+   against the Python/ reference on the real 8,716-site system. The bar
    is machine-precision agreement (or, where an algorithm legitimately differs
    like Jacobi-vs-Gauss-Seidel SHAKE, the same physical invariant).
 3. **Clean numpy→JAX boundary at the loader.** All one-time setup (parsing,
@@ -457,6 +457,6 @@ cross-checks it against the CPU path.
   start.
 - A few steps of MD say little about energy drift; judge conservation over
   hundreds of steps.
-- COULOMB_CONST must be 332.08 (reference value). Fortran `derfc()` is
+- COULOMB_CONST must be 332.08 (reference value).  `derfc()` is
   double-precision erfc, not a derivative.
 - Validate every component bit-for-bit, or errors hide until they compound.
