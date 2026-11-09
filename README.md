@@ -140,7 +140,7 @@ exactly. Forces are scatter-summed, so pair ordering is irrelevant.
   4,193,150.
 
 ### 4.4 `forces/pair_splined.py` — splined non-bonded
-- **Physics:** APPLE&P short-range = exp-6 / 12-6 vdW + erfc-damped real-space
+- **Physics:** APPLE&P-typed short-range = exp-6 / 12-6 vdW + erfc-damped real-space
   electrostatics, pre-tabulated by the reference as **quintic splines in
   z = r²**.
 - **Per pair:** z = r² (min image), clamp to the spline domain, piece index
@@ -425,7 +425,7 @@ cross-checks it against the CPU path.
 
 ## 9. Roadmap position
 
-- Done: classical and fully polarizable APPLE&P MD on the GPU, validated
+- Done: classical and fully polarizable  MD on the GPU, validated
   against the reference, 9.2 / ~56 ms/step.
 - In development: MLIP energy/forces in parallel with the PFF (same
   `force_fn(x) → E, F` interface), constant-potential method, coupled
