@@ -1,0 +1,47 @@
+# GOMD scan log  devices=[CudaDevice(id=0)]  jax 0.12.0.1
+time step: 0.5 fs (mdrun.params: 0.5 fs)
+electrodes: lower 1792 atoms, upper 1792 atoms, normal to z, frozen; geometry flat
+  lower layer 0: 448 atoms, z 131.305 (input sd 0.058); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.043 A, max 0.103 A
+  lower layer 1: 448 atoms, z 3.086 (input sd 0.057); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.042 A, max 0.114 A
+  lower layer 2: 448 atoms, z 6.514 (input sd 0.076); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.049 A, max 0.137 A
+  lower layer 3: 448 atoms, z 9.948 (input sd 0.076); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.043 A, max 0.102 A
+  upper layer 0: 448 atoms, z 117.640 (input sd 0.124); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.049 A, max 0.114 A
+  upper layer 1: 448 atoms, z 121.049 (input sd 0.090); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.045 A, max 0.133 A
+  upper layer 2: 448 atoms, z 124.476 (input sd 0.069); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.045 A, max 0.112 A
+  upper layer 3: 448 atoms, z 127.893 (input sd 0.061); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.048 A, max 0.111 A
+  inner gap (layer centres) 107.692 A; stack height 128.213 A
+  frozen: 3584 atoms; dropped 5376 bonds, 10752 bends, 21504 torts, 10752 out-of-plane, 0 constraints; ndof 46632 -> 35880; COM-velocity removal off (the electrodes take momentum)
+ensemble: NVE  ndof = 35880
+neighbor pairs between frozen atoms left out: 1540224
+neighbor pairs: 7748203, padded capacity: 9685253
+pairs inside rcut + 0.05 A: 6149031; per-step compacted list capacity 6763934
+polarization: ENABLED (full induced-dipole SCF each step, pcg solver, predict start, tolpol 1e-09, max 50 iterations; with k-space charge-dipole force)
+neighbor list: rlist 13 A (skin 1), rebuilt every 100 steps and whenever a site drifts > 0.49 A
+Initial polarizable PE: -7521.0449 kcal/mol  (SCF: 7 T.mu products, E_pol -15378.9301)
+Initial KE: 11162.5532 kcal/mol  T = 313.13 K
+  step             PE           KE             TE  scf_it    ms/step
+    40     -7767.9349   11409.1920      3641.2570    2.50      105.1
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+    80     -8168.4347   11810.1025      3641.6678    2.35      103.8
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   120     -8259.9888   11900.2234      3640.2347    2.38      103.4
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+   160     -7935.4441   11576.9862      3641.5421    2.40       58.0
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   200     -8013.1321   11654.7678      3641.6356    2.40       57.7
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+   240     -8169.1786   11810.4580      3641.2794    2.35       56.7
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   280     -8107.6151   11749.8074      3642.1923    2.33       61.6
+# nb: 3 rebuilds since the last line, 3 of them on drift > 0.49 A
+   320     -8198.6650   11839.6320      3640.9671    2.38       60.4
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+   360     -8104.3602   11746.4489      3642.0887    2.38       56.9
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   400     -8063.9117   11705.6763      3641.7646    2.38       58.3
+# nb: 4 rebuilds since the last line, 3 of them on drift > 0.49 A
+=== done: 28.9s MD, 72.2 ms/step avg ===
+# neighbor list: 26 rebuilds in 400 steps (22 on drift alone), peak drift before a rebuild 0.520 A (trigger 0.49 A), max pairs 7748484 / capacity 9685253 (80%), max pairs missed by a stale list 0
+# pairs inside rcut + 0.05 A per step: max 6149221 / capacity 6763934 (91%)
+# SCF: 2.38 T.mu products per step on average
+# electrodes: max displacement of the 3584 frozen atoms over the run 0.000e+00 A, max |v| 0.000e+00 m/s

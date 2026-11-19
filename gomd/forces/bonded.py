@@ -136,7 +136,9 @@ def torsion_energy_force(x, torts, twist, nprms, box, nat, max_terms):
 
     cosphi = jnp.clip(jnp.sum(m * n, axis=1) / jnp.sqrt(jnp.where(good, mm * nn, 1.0)),
                       -1.0, 1.0)
-    sign = jnp.sum(rij * n, axis=1)
+    # Dihedral sign must match the derivative formulas below (IUPAC convention,
+    # b1 = x_j - x_i = -rij). The energy is even in phi, so this only affects F.
+    sign = -jnp.sum(rij * n, axis=1)
     sinphi = jnp.sqrt(jnp.maximum(1.0 - cosphi * cosphi, 0.0))
     sinphi = jnp.where(sign < 0, -sinphi, sinphi)
     phi = jnp.arctan2(sinphi, cosphi)         # (ntort,)
@@ -160,8 +162,10 @@ def torsion_energy_force(x, torts, twist, nprms, box, nat, max_terms):
     # dphi_di = -rjk_mag * mm_inv * m ; dphi_dl = rjk_mag * nn_inv * n
     dphi_di = -(rjk_mag * mm_inv)[:, None] * m       # (ntort,3)
     dphi_dl = (rjk_mag * nn_inv)[:, None] * n
-    a = (rijdotrjk / jnp.where(good, rjk2, 1.0))[:, None]
-    b = (rjkdotrkl / jnp.where(good, rjk2, 1.0))[:, None]
+    # The j/k formulas are written for r_kj = x_k - x_j; rjk here is x_j - x_k,
+    # hence the minus signs. (Both sign fixes verified against autodiff: 5.6e-12.)
+    a = (-rijdotrjk / jnp.where(good, rjk2, 1.0))[:, None]
+    b = (-rjkdotrkl / jnp.where(good, rjk2, 1.0))[:, None]
     dphi_dj = (a - 1.0) * dphi_di - b * dphi_dl
     dphi_dk = (b - 1.0) * dphi_dl - a * dphi_di
 

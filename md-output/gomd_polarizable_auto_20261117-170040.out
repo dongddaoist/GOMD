@@ -1,0 +1,14 @@
+# GOMD scan log  devices=[CudaDevice(id=0)]  jax 0.11.1
+ensemble: NVT, Nose-Hoover chain (MTK, 5x5 Yoshida-Suzuki)  T = 296.15 K  chain = 1  OmegaQ = 0.01 1/fs  ndof = 15192
+SHAKE: 7008 constraints, tol 1e-12 (reference 1e-06), max 100 iterations
+neighbor pairs: 3354520, padded capacity: 4193150
+# WARNING: tolpol 0.0001 is loose — the SCF stops before E_pol converges (on the 8,716-site PEO/LiFSI system 1e-4 left E_pol 19 kcal/mol off). Use --tolpol 1e-8 (about 3x the SCF iterations).
+polarization: ENABLED (full induced-dipole SCF each step, tolpol 0.0001, max 50 iterations; with k-space charge-dipole force)
+Initial polarizable PE: -3611.5368 kcal/mol
+Initial KE: 7601.9979 kcal/mol  T = 503.65 K
+  step             PE           KE             TE         T          H_ext    ms/step
+    50     -3935.9305    7498.6448      3562.7143    496.80   -251477.2610       67.1
+   100     -4378.3600    6935.2398      2556.8798    459.47   -251477.3424       70.9
+   150     -4905.6281    6094.8668      1189.2387    403.80   -251508.5301       69.9
+   200     -5452.9061    5259.1293      -193.7768    348.43   -251478.5695       75.3
+=== done: 14.2s MD, 70.8 ms/step avg ===

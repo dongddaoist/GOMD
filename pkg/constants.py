@@ -50,3 +50,44 @@ class DefaultParams:
 
 # Derived parameters
 MAXNNB = DefaultParams.maxcharges * (DefaultParams.maxcharges + 1) // 2
+
+# Limits that a params.h may raise. The defaults above are those of the
+# 8,716-site PEO/LiFSI input, which ships no params.h. maxbox and kmax_* are
+# left alone: maxbox means something else here, and the k-limits come from
+# mdrun.params.
+PARAMS_H_LIMITS = ('maxnch', 'maxat', 'maxbonds', 'maxbends', 'maxtorts', 'maxdeforms',
+                   'maxtypes', 'maxcharges', 'maxdummy', 'maxbtypes', 'maxfolds', 'maxnay',
+                   'maxdim', 'maxpoints', 'maxprop')
+
+
+def apply_params_h(path="params.h"):
+    """Raise the array limits to those of the params.h next to the input, if any.
+
+    SystemGenerator writes params.h with the input files and the Fortran code is
+    compiled with it; a system with more force-field types or sites than the
+    defaults (e.g. 12 repulsion-dispersion and 27 charge types for the graphite
+    electrode cell, 2026-11-18) cannot be read without it. Only integer
+    'parameter (name = value)' lines for the limits in PARAMS_H_LIMITS count, and
+    limits are only raised, never lowered. None of these values is used inside
+    numba-compiled code: they size the arrays the parser allocates.
+
+    Returns {name: (old, new)} for the limits that changed.
+    """
+    global MAXNNB
+    import os
+    import re
+    if not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        text = f.read()
+    changed = {}
+    for name, val in re.findall(r'parameter\s*\(\s*(\w+)\s*=\s*([0-9]+)\s*\)', text, flags=re.I):
+        name = name.lower()
+        if name not in PARAMS_H_LIMITS:
+            continue
+        old = getattr(DefaultParams, name)
+        if int(val) > old:
+            setattr(DefaultParams, name, int(val))
+            changed[name] = (old, int(val))
+    MAXNNB = DefaultParams.maxcharges * (DefaultParams.maxcharges + 1) // 2
+    return changed

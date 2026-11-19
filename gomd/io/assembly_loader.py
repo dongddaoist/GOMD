@@ -76,6 +76,11 @@ def load_m2_system(input_dir, ref_pkg_dir):
         'bonds': np.asarray(state.connectivity.bonds)[:, :state.connectivity.nbonds].astype(np.int32),
         'bends': np.asarray(state.connectivity.bends)[:, :state.connectivity.nbends].astype(np.int32),
         'torts': np.asarray(state.connectivity.torts)[:, :state.connectivity.ntorts].astype(np.int32),
+        # out-of-plane terms (rows 0-3 atoms, 4 type). GOMD does not evaluate them;
+        # carried so the driver can refuse a system where they act on mobile atoms
+        'deforms': (np.asarray(state.connectivity.deforms)[:, :int(state.connectivity.ndeforms)]
+                    .astype(np.int32) if int(getattr(state.connectivity, 'ndeforms', 0) or 0) > 0
+                    else np.zeros((8, 0), np.int32)),
     }
     ffb = {
         'stretch': np.asarray(ff.stretch),
@@ -174,8 +179,23 @@ def load_m2_system(input_dir, ref_pkg_dir):
             'lpolarizable': True,
         }
 
+    # ---- ensemble / thermostat (mdrun.params + coords.inp restart state) ----
+    th = state.thermostat
+    nnos = int(p.nnos)
+    ensemble = {
+        'nve': bool(p.nve), 'nvt': bool(p.nvt), 'npt': bool(p.npt),
+        'Tset': float(state.Tset), 'nnos': nnos, 'qfreq': float(p.qfreq),
+        'ndof': int(state.ndof), 'natreal': int(a.natreal),
+        'multibig': int(getattr(p, 'multibig', 1) or 1),
+        'xlogs': np.asarray(th.xlogs, dtype=np.float64)[:nnos].copy(),
+        'vlogs': np.asarray(th.vlogs, dtype=np.float64)[:nnos].copy(),
+        'glogs': np.asarray(th.glogs, dtype=np.float64)[:nnos].copy(),
+    }
+
     return {
         'nat': nat, 'ndummy': ndummy,
+        'ensemble': ensemble,
+        'atom_labels': [str(ff.atom_labels[t]) for t in range(len(ff.atom_labels))],
         'x': x, 'v': v, 'mass': mass, 'massinv': massinv,
         'ldummy': ldummy, 'box': box, 'q': q_per_atom, 'atomtype': atomtype,
         # splines

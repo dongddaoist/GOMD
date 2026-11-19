@@ -25,9 +25,11 @@ Milestones:
     M3: polarization SCF wired into the step loop                    — done
     M4: performance (on-device neighbor list, lax.scan loop,
         segment_sum pair kernel)                                     — done
-    M5: ML/MM integration for steps 3-4 of the roadmap
+    M5: NVT (Nose-Hoover chain), MLIP provider (UMA via fairchem in its
+        own process), PFF/MLIP side-by-side comparison, Colab runner — done
+    M6: hybrid PFF/MLIP regions, ML replacement of the SCF
 
 Entry point: python -m gomd.main_scan  (see GOMD_DOCUMENTATION.md)
 """
 
-__version__ = "0.0.1-M1"
+__version__ = "0.6.0.dev0"   # 2026-11-17: profiler, PCG SCF, neighbor-list checks (not yet run on a GPU)

@@ -1,0 +1,48 @@
+# GOMD scan log  devices=[CudaDevice(id=0)]  jax 0.12.0.1
+electrodes: lower 1792 atoms, upper 1792 atoms, normal to z, frozen; geometry flat
+  lower layer 0: 448 atoms, z 38.394 (input sd 0.058); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.043 A, max 0.103 A
+  lower layer 1: 448 atoms, z 41.799 (input sd 0.057); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.042 A, max 0.114 A
+  lower layer 2: 448 atoms, z 45.228 (input sd 0.076); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.049 A, max 0.137 A
+  lower layer 3: 448 atoms, z 48.661 (input sd 0.076); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.043 A, max 0.102 A
+  upper layer 0: 448 atoms, z 156.353 (input sd 0.124); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.049 A, max 0.114 A
+  upper layer 1: 448 atoms, z 159.762 (input sd 0.090); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.045 A, max 0.133 A
+  upper layer 2: 448 atoms, z 163.190 (input sd 0.069); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.045 A, max 0.112 A
+  upper layer 3: 448 atoms, z 166.606 (input sd 0.061); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.048 A, max 0.111 A
+  inner gap (layer centres) 107.692 A; stack height 128.213 A
+  slab box: z 131.625 -> 205.000 A, vacuum 76.8 A; lower electrode at z 38.39..48.66, upper 156.35..166.61; kmax_z 16 -> 25
+  frozen: 3584 atoms; dropped 5376 bonds, 10752 bends, 21504 torts, 10752 out-of-plane, 0 constraints; ndof 46632 -> 35880; COM-velocity removal off (the electrodes take momentum)
+ensemble: NVE  ndof = 35880
+k-space: alpha 0.23, kmax 7/7/25, 2535 k-vectors; 2D Ewald (3D sum in the slab box + planar dipole term)
+neighbor pairs between frozen atoms left out: 1214304
+neighbor pairs: 7748203, padded capacity: 9685253
+pairs inside rcut + 0.05 A: 6149033; per-step compacted list capacity 6763936
+polarization: ENABLED (full induced-dipole SCF each step, pcg solver, predict start, tolpol 1e-09, max 50 iterations; with k-space charge-dipole force)
+neighbor list: rlist 13 A (skin 1), rebuilt every 100 steps and whenever a site drifts > 0.49 A
+Initial polarizable PE: -7521.0078 kcal/mol  (SCF: 7 T.mu products, E_pol -15379.3716)
+Initial KE: 11162.5532 kcal/mol  T = 313.13 K
+  step             PE           KE             TE  scf_it    ms/step
+    40     -7767.9412   11409.2376      3641.2964    2.48      122.5
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+    80     -8168.5364   11810.2476      3641.7112    2.35      121.3
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   120     -8260.1933   11900.4651      3640.2718    2.40       67.6
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+   160     -7935.3983   11576.9836      3641.5853    2.38       69.4
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   200     -8013.4157   11655.1021      3641.6864    2.38       68.4
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+   240     -8169.2216   11810.5365      3641.3149    2.40       66.9
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   280     -8107.9063   11750.1178      3642.2114    2.35       67.2
+# nb: 3 rebuilds since the last line, 3 of them on drift > 0.49 A
+   320     -8198.3961   11839.3649      3640.9687    2.38       67.3
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+   360     -8104.2297   11746.3639      3642.1342    2.38       66.5
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   400     -8065.0772   11706.8792      3641.8020    2.40       68.1
+# nb: 4 rebuilds since the last line, 3 of them on drift > 0.49 A
+=== done: 31.4s MD, 78.5 ms/step avg ===
+# neighbor list: 26 rebuilds in 400 steps (22 on drift alone), peak drift before a rebuild 0.520 A (trigger 0.49 A), max pairs 7748472 / capacity 9685253 (80%), max pairs missed by a stale list 0
+# pairs inside rcut + 0.05 A per step: max 6149220 / capacity 6763936 (91%)
+# SCF: 2.39 T.mu products per step on average
+# electrodes: max displacement of the 3584 frozen atoms over the run 0.000e+00 A, max |v| 0.000e+00 m/s

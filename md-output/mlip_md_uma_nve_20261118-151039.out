@@ -1,0 +1,50 @@
+# GOMD MLIP MD  2026-11-18 15:10:42  input /content/drive/MyDrive/GOMD/code/GOMD/md-input2/sphere_2000.xyz
+# 2002 atoms (H774 Li11 C516 N11 O216 F452 S22), cluster, no PBC (frame 72.9767 x 72.9767 x 72.9767) A, charge 0, spin 1, ndof 6003 (no constraints), dt 0.5 fs, NVE
+# MLIP uma ready in 11.8 s: {'backend': 'uma', 'model': 'uma-s-1p2p1', 'task': 'omol', 'settings': 'high-precision', 'device': 'cuda', 'gpu': 'NVIDIA L4', 'fairchem': '2.26.0', 'torch': '2.13.0+cu130', 'load_s': 8.8}
+# initial: PE -57078476.4723 kcal/mol (-1236.342160 eV/atom), KE 2104.9080 kcal/mol, T 352.92 K, |F| rms 18.664 kcal/mol/A, sum F 2.12e-04
+# energy probe: |E| = 57078476.5 kcal/mol (fp32 step there ~ 6.8); same configuration again: dE +0.000e+00
+#   atom 1323 (C) moved 0.0001 A along F: dE -0.010343 kcal/mol, expected -|F| s = -0.012041
+#   atom 1323 (C) moved 0.001 A along F: dE -0.118932 kcal/mol, expected -|F| s = -0.120409
+#   atom 1323 (C) moved 0.01 A along F: dE -1.138983 kcal/mol, expected -|F| s = -1.204094
+#   fd-check atom  1702 H  x  F   +7.14202  -dE/dx   +6.91754  rel diff 3.1e-02
+#   fd-check atom  1702 H  y  F   -2.62809  -dE/dx   -2.25842  rel diff 1.4e-01
+#   fd-check atom  1702 H  z  F   +1.84876  -dE/dx   +1.80525  rel diff 2.4e-02
+#   fd-check atom  1275 C  x  F   -6.36078  -dE/dx   -6.07574  rel diff 4.5e-02
+#   fd-check atom  1275 C  y  F   -6.72447  -dE/dx   -7.95423  rel diff 1.8e-01
+#   fd-check atom  1275 C  z  F  -32.43928  -dE/dx  -32.81581  rel diff 1.2e-02
+# fd-check at the initial configuration (h = 0.001 A, |F| floor 0.01): max rel diff 1.8e-01
+  step               PE           KE               TE   ms/step  mlip_ms
+    10   -57078842.8772    2470.1495   -57076372.7278     570.0    569.9
+    20   -57078742.8525    2370.5829   -57076372.2695     571.4    571.3
+    30   -57078611.2630    2239.2678   -57076371.9952     575.6    575.6
+    40   -57078836.8546    2464.0472   -57076372.8073     580.5    580.4
+    50   -57078699.6251    2327.2221   -57076372.4029     580.0    579.9
+    60   -57078687.9323    2315.3508   -57076372.5814     581.1    581.0
+    70   -57078775.6132    2402.8251   -57076372.7882     587.8    587.7
+    80   -57078727.8657    2355.2355   -57076372.6302     590.0    589.9
+    90   -57078710.5701    2338.1051   -57076372.4650     589.3    589.2
+   100   -57078806.8604    2434.2214   -57076372.6390     588.8    588.7
+   110   -57078767.6865    2395.2485   -57076372.4380     588.3    588.2
+   120   -57078768.3066    2395.9140   -57076372.3926     580.0    579.9
+   130   -57078820.9048    2448.3915   -57076372.5133     581.6    581.5
+   140   -57078787.3289    2414.8364   -57076372.4925     579.3    579.2
+   150   -57078733.8775    2361.5009   -57076372.3766     587.8    587.7
+   160   -57078796.9242    2424.3986   -57076372.5256     587.6    587.5
+   170   -57078795.6340    2422.9855   -57076372.6485     581.0    580.9
+   180   -57078682.4719    2310.1476   -57076372.3243     580.7    580.6
+   190   -57078748.1486    2375.5172   -57076372.6314     583.6    583.5
+   200   -57078717.8005    2345.1947   -57076372.6058     587.0    586.9
+# TE: drift -0.00237 kcal/mol/fs, sd about the fit 0.1795 kcal/mol, mean minus initial -0.8955; T mean 398.22 K (sd 9.52)
+# energy probe: |E| = 57078717.8 kcal/mol (fp32 step there ~ 6.8); same configuration again: dE +0.000e+00
+#   atom 1639 (C) moved 0.0001 A along F: dE -0.010615 kcal/mol, expected -|F| s = -0.011136
+#   atom 1639 (C) moved 0.001 A along F: dE -0.110591 kcal/mol, expected -|F| s = -0.111358
+#   atom 1639 (C) moved 0.01 A along F: dE -1.035759 kcal/mol, expected -|F| s = -1.113584
+#   fd-check atom  1702 H  x  F   +6.66667  -dE/dx   +6.50260  rel diff 2.5e-02
+#   fd-check atom  1702 H  y  F   -2.64236  -dE/dx   -2.52604  rel diff 4.4e-02
+#   fd-check atom  1702 H  z  F   -5.94782  -dE/dx   -6.28032  rel diff 5.6e-02
+#   fd-check atom  1275 C  x  F   +4.28711  -dE/dx   +3.95096  rel diff 7.8e-02
+#   fd-check atom  1275 C  y  F  +31.92481  -dE/dx  +32.17440  rel diff 7.8e-03
+#   fd-check atom  1275 C  z  F  +12.51024  -dE/dx  +12.50860  rel diff 1.3e-04
+# fd-check at the final configuration (h = 0.001 A, |F| floor 0.01): max rel diff 7.8e-02
+=== done: 200 steps in 116.5 s (582.7 ms/step; MLIP 582.5 ms/step, 233 evaluations) ===
+restart: /content/drive/MyDrive/GOMD/code/GOMD/md-output/mlip_md_uma_nve_20261118-151039_restart.xyz

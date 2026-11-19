@@ -32,6 +32,11 @@ def parse_line(line: str) -> List[str]:
     return line.split()
 
 
+def _ffloat(token: str) -> float:
+    """float() that also reads Fortran double-precision literals: 1.d-14, 1.0D-9."""
+    return float(token.replace('d', 'e').replace('D', 'E'))
+
+
 def read_mdrun_params(filename: str = "mdrun.params") -> SystemParams:
     """
     Read simulation parameters from mdrun.params (Fortran unit 25).
@@ -58,29 +63,29 @@ def read_mdrun_params(filename: str = "mdrun.params") -> SystemParams:
         # Line 2: Cutoff, drift, timestep, steps
         line = read_a_line(f)
         tokens = parse_line(line)
-        params.rcut = float(tokens[0])
-        params.driftmax = float(tokens[1])
-        params.delt = float(tokens[2])
+        params.rcut = _ffloat(tokens[0])
+        params.driftmax = _ffloat(tokens[1])
+        params.delt = _ffloat(tokens[2])
         params.nsteps = int(tokens[3])
         
         # Line 3: Temperature control
         line = read_a_line(f)
         tokens = parse_line(line)
-        params.tstart = float(tokens[0])
+        params.tstart = _ffloat(tokens[0])
         params.nnos = int(tokens[1])
-        params.qfreq = float(tokens[2])
+        params.qfreq = _ffloat(tokens[2])
         
         # Line 4: Pressure control
         line = read_a_line(f)
         tokens = parse_line(line)
-        params.pfix = np.array([float(tokens[0]), float(tokens[1]), float(tokens[2])])
+        params.pfix = np.array([_ffloat(tokens[0]), _ffloat(tokens[1]), _ffloat(tokens[2])])
         box_const = [tokens[3].upper() in ['T', 'TRUE', '.TRUE.'],
                      tokens[4].upper() in ['T', 'TRUE', '.TRUE.'],
                      tokens[5].upper() in ['T', 'TRUE', '.TRUE.']]
         press_avg = [tokens[6].upper() in ['T', 'TRUE', '.TRUE.'],
                      tokens[7].upper() in ['T', 'TRUE', '.TRUE.'],
                      tokens[8].upper() in ['T', 'TRUE', '.TRUE.']]
-        params.wfreq = float(tokens[9])
+        params.wfreq = _ffloat(tokens[9])
         
         if params.npt:
             params.box_mult = np.array([1 if bc else 0 for bc in box_const])
@@ -91,19 +96,19 @@ def read_mdrun_params(filename: str = "mdrun.params") -> SystemParams:
         line = read_a_line(f)
         tokens = parse_line(line)
         params.tbpol = tokens[0].upper() in ['T', 'TRUE', '.TRUE.']
-        params.rop = float(tokens[1])
-        params.rscalep = float(tokens[2])
-        params.epsilonp = float(tokens[3])
-        params.repsilonp = float(tokens[4])
+        params.rop = _ffloat(tokens[1])
+        params.rscalep = _ffloat(tokens[2])
+        params.epsilonp = _ffloat(tokens[3])
+        params.repsilonp = _ffloat(tokens[4])
         
         # Line 6: Output frequencies
         line = read_a_line(f)
         tokens = parse_line(line)
-        params.ninit = int(float(tokens[0]))
-        params.nave = float(tokens[1])
-        params.nvir = float(tokens[2])
-        params.nnben = float(tokens[3])
-        params.noutput = float(tokens[4])
+        params.ninit = int(_ffloat(tokens[0]))
+        params.nave = _ffloat(tokens[1])
+        params.nvir = _ffloat(tokens[2])
+        params.nnben = _ffloat(tokens[3])
+        params.noutput = _ffloat(tokens[4])
         
         # Line 7: Output flags
         line = read_a_line(f)
@@ -116,16 +121,16 @@ def read_mdrun_params(filename: str = "mdrun.params") -> SystemParams:
         # Line 8: Output frequencies for coordinates
         line = read_a_line(f)
         tokens = parse_line(line)
-        params.nboxdip = float(tokens[0])
-        params.ncoords = float(tokens[1])
-        params.nstress = float(tokens[2])
-        params.nvelocs = float(tokens[3])
+        params.nboxdip = _ffloat(tokens[0])
+        params.ncoords = _ffloat(tokens[1])
+        params.nstress = _ffloat(tokens[2])
+        params.nvelocs = _ffloat(tokens[3])
         
         # Line 9: Box scaling
         line = read_a_line(f)
         tokens = parse_line(line)
         params.chvol = tokens[0].upper() in ['T', 'TRUE', '.TRUE.']
-        params.boxnew = np.array([float(tokens[1]), float(tokens[2]), float(tokens[3])])
+        params.boxnew = np.array([_ffloat(tokens[1]), _ffloat(tokens[2]), _ffloat(tokens[3])])
         params.printout = tokens[4].upper() in ['T', 'TRUE', '.TRUE.']
         
         # Line 10: Interaction flags
@@ -139,21 +144,21 @@ def read_mdrun_params(filename: str = "mdrun.params") -> SystemParams:
         line = read_a_line(f)
         tokens = parse_line(line)
         params.lredonefour = tokens[0].upper() in ['T', 'TRUE', '.TRUE.']
-        params.redfactor = float(tokens[1])
+        params.redfactor = _ffloat(tokens[1])
         params.lredQ_mu14 = tokens[2].upper() in ['T', 'TRUE', '.TRUE.']
-        params.redQmufactor = float(tokens[3])
+        params.redQmufactor = _ffloat(tokens[3])
         
         # Line 12: Constraints
         line = read_a_line(f)
         tokens = parse_line(line)
         params.constrain = tokens[0].upper() in ['T', 'TRUE', '.TRUE.']
-        params.tol = float(tokens[1])
+        params.tol = _ffloat(tokens[1])
         
         # Line 13: Electrostatics (with label)
         line = read_a_line(f)
         # First 12 chars are label
         rest = line[12:].split()
-        params.alphai = float(rest[0])
+        params.alphai = _ffloat(rest[0])
         params.klimitx = int(rest[1])
         params.klimity = int(rest[2])
         params.klimitz = int(rest[3])
@@ -164,15 +169,15 @@ def read_mdrun_params(filename: str = "mdrun.params") -> SystemParams:
         rest = line[12:].split()
         params.multimed = int(rest[0])
         params.multibig = int(rest[1])
-        params.ros = float(rest[2])
+        params.ros = _ffloat(rest[2])
         
         # Line 15: Polarization convergence (with label)
         line = read_a_line(f)
         rest = line[22:].split()
-        params.tolpol = float(rest[0])
+        params.tolpol = _ffloat(rest[0])
         params.tapering = rest[1].upper() in ['T', 'TRUE', '.TRUE.']
-        params.rtaper = float(rest[2])
-        params.epsrf = float(rest[3])
+        params.rtaper = _ffloat(rest[2])
+        params.epsrf = _ffloat(rest[3])
     
     print(f"File: mdrun.params has been read")
     return params
@@ -956,8 +961,19 @@ def load_simulation(directory: str = ".", debug_input=False) -> SimulationState:
     os.chdir(directory)
     
     try:
+        # Array limits from params.h, if the input ships one (before any array is
+        # sized, SimulationState() included). read_forcefield sizes with the
+        # module-level MAXNNB, so refresh it too.
+        import constants as _constants
+        global MAXNNB
+        changed = _constants.apply_params_h("params.h")
+        MAXNNB = _constants.MAXNNB
+        if changed:
+            print("File: params.h raises array limits: "
+                  + ", ".join(f"{k} {a}->{b}" for k, (a, b) in changed.items()))
+
         state = SimulationState()
-        
+
         # Read parameters
         state.params = read_mdrun_params()
         

@@ -1,0 +1,14 @@
+# GOMD ensemble check (nvt)  2026-11-17 21:43:01  jax 0.12.0.1  NVIDIA GeForce RTX 5070 Laptop GPU
+# polarizable, tolpol 1e-08 (PCG + predict); SHAKE 1e-12, drift rebuilds, rcut compaction, shared k-space
+# NVT: Tset 296.15 K, Nose-Hoover chain 1, OmegaQ 0.01 1/fs, ndof 15192, dt 0.5 fs; molecules: FSI- 36, Li+ 36, solvent 320
+## equilibration: 30000 steps (15.0 ps)
+  T per ps: 289 304 296 295 295 297 296 295 296 296 297 296 295 297 296   (21.3 ms/step)
+## production: 40000 steps (20.0 ps), observables every 10 steps
+  T = 296.14 +- 0.05 K   (Tset 296.15)
+  sd(KE) = 51.31 +- 2.72 kcal/mol   canonical sqrt(ndof/2) k Tset = 51.29   ratio 1.000
+  H_ext drift +0.00074 kcal/mol/fs, sd 1.423   (21.9 ms/step)
+  KE along constrained bonds: 0.000% of KE (rms u 0.6 m/s); in temperature units 0.00 K
+  translational (COM) temperature per group, 3 dof per molecule:
+    FSI-       36 molecules  T_com =  319.47 +-  4.89 K
+    Li+        36 molecules  T_com =  320.16 +-  3.83 K
+    solvent   320 molecules  T_com =  315.44 +-  3.74 K

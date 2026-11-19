@@ -1,0 +1,65 @@
+# GOMD scan log  devices=[CudaDevice(id=0)]  jax 0.12.0.1
+time step: 0.25 fs (mdrun.params: 0.5 fs)
+electrodes: lower 1792 atoms, upper 1792 atoms, normal to z, frozen; geometry flat
+  lower layer 0: 448 atoms, z 131.305 (input sd 0.058); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.043 A, max 0.103 A
+  lower layer 1: 448 atoms, z 3.086 (input sd 0.057); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.042 A, max 0.114 A
+  lower layer 2: 448 atoms, z 6.514 (input sd 0.076); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.049 A, max 0.137 A
+  lower layer 3: 448 atoms, z 9.948 (input sd 0.076); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.043 A, max 0.102 A
+  upper layer 0: 448 atoms, z 117.640 (input sd 0.124); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.049 A, max 0.114 A
+  upper layer 1: 448 atoms, z 121.049 (input sd 0.090); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.045 A, max 0.133 A
+  upper layer 2: 448 atoms, z 124.476 (input sd 0.069); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.045 A, max 0.112 A
+  upper layer 3: 448 atoms, z 127.893 (input sd 0.061); snapped to graphene (8x14 cells, b 1.4100 A, armchair along x): in-plane rms 0.048 A, max 0.111 A
+  inner gap (layer centres) 107.692 A; stack height 128.213 A
+  frozen: 3584 atoms; dropped 5376 bonds, 10752 bends, 21504 torts, 10752 out-of-plane, 0 constraints; ndof 46632 -> 35880; COM-velocity removal off (the electrodes take momentum)
+ensemble: NVE  ndof = 35880
+neighbor pairs between frozen atoms left out: 1540224
+neighbor pairs: 7748203, padded capacity: 9685253
+pairs inside rcut + 0.05 A: 6149031; per-step compacted list capacity 6763934
+polarization: ENABLED (full induced-dipole SCF each step, pcg solver, predict start, tolpol 1e-09, max 50 iterations; with k-space charge-dipole force)
+neighbor list: rlist 13 A (skin 1), rebuilt every 100 steps and whenever a site drifts > 0.49 A
+Initial polarizable PE: -7521.0453 kcal/mol  (SCF: 7 T.mu products, E_pol -15378.9301)
+Initial KE: 11162.5532 kcal/mol  T = 313.13 K
+  step             PE           KE             TE  scf_it    ms/step
+    40     -7629.8168   11271.2615      3641.4448    2.12      108.1
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    80     -7801.9072   11443.2107      3641.3035    2.05      102.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   120     -8078.8479   11720.2784      3641.4305    2.00      100.5
+   160     -8182.9807   11824.5564      3641.5758    2.08       68.1
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   200     -8156.5999   11797.9818      3641.3819    2.05       55.4
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   240     -8285.5318   11926.7081      3641.1764    2.00       54.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   280     -8113.3493   11754.9348      3641.5855    2.05       54.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   320     -7955.6232   11597.2473      3641.6241    2.05       54.8
+   360     -7982.5167   11623.9826      3641.4659    2.00       54.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   400     -8029.3593   11671.0772      3641.7179    2.05       55.6
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   440     -8143.9046   11785.7831      3641.8785    2.05       54.8
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   480     -8200.3893   11841.9546      3641.5654    2.05       54.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   520     -8235.3052   11876.8382      3641.5330    2.10       55.6
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   560     -8117.1363   11759.0549      3641.9186    2.05       55.8
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   600     -8021.3966   11663.3428      3641.9462    2.05       55.5
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   640     -8234.7728   11876.3534      3641.5807    2.05       54.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   680     -8112.2348   11754.0384      3641.8036    2.15       55.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   720     -8117.1633   11759.1132      3641.9499    2.05       55.5
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   760     -8165.4216   11807.3148      3641.8932    2.05       54.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   800     -8083.6667   11725.5929      3641.9262    2.05       56.2
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+=== done: 50.4s MD, 63.0 ms/step avg ===
+# neighbor list: 28 rebuilds in 800 steps (20 on drift alone), peak drift before a rebuild 0.502 A (trigger 0.49 A), max pairs 7748453 / capacity 9685253 (80%), max pairs missed by a stale list 0
+# pairs inside rcut + 0.05 A per step: max 6149221 / capacity 6763934 (91%)
+# SCF: 2.06 T.mu products per step on average
+# electrodes: max displacement of the 3584 frozen atoms over the run 0.000e+00 A, max |v| 0.000e+00 m/s

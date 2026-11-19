@@ -29,7 +29,7 @@ from .ewald import (
 )
 
 
-def compute_all_forces(x, D, idx_i, idx_j, kx, ky, kz, ewself):
+def compute_all_forces(x, D, idx_i, idx_j, kx, ky, kz, ewself, recip_ef=None):
     """Full classical (non-polarizable) force + energy.
 
     Args:
@@ -38,6 +38,9 @@ def compute_all_forces(x, D, idx_i, idx_j, kx, ky, kz, ewself):
         idx_i, idx_j: neighbor pairs (host-built, jax arrays).
         kx, ky, kz: Ewald k-vectors (host-built, jax arrays).
         ewself: scalar Ewald self-energy (precomputed).
+        recip_ef: optional (energy before the self term, force) of the
+            reciprocal sum, already computed by the shared k-space pass
+            (recip_shared); None computes it here (ewald.reciprocal_energy_force).
 
     Returns:
         pe (scalar), forces (nat,3), components (dict of scalars).
@@ -75,8 +78,11 @@ def compute_all_forces(x, D, idx_i, idx_j, kx, ky, kz, ewself):
                                   box, nat, D['max_torsion_terms'])
 
     # --- Ewald reciprocal + self + exclusion correction ---
-    erecip_raw, f_recip = reciprocal_energy_force(
-        x, D['q'], box, kx, ky, kz, D['alpha'])
+    if recip_ef is None:
+        erecip_raw, f_recip = reciprocal_energy_force(
+            x, D['q'], box, kx, ky, kz, D['alpha'])
+    else:
+        erecip_raw, f_recip = recip_ef
     erecip = erecip_raw - ewself
     ecorr, f_corr = exclusion_correction(
         x, D['excl_qq'], D['excl_i'], D['excl_j'], box, D['alpha'], nat)

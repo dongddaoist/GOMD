@@ -1,0 +1,9 @@
+# GOMD MLIP MD  2026-11-17 23:20:07  input md-input2/system.xyz
+# 7400 atoms (H2880 Li36 C1920 N36 O784 F1672 S72), box 46.9566 x 46.9566 x 46.9566 A, charge 0, spin 1, ndof 22197 (no constraints), dt 1.0 fs, NVE
+# MLIP mock ready in 1.9 s: {'backend': 'mock', 'pairs': 8363, 'k_eV_A2': 10.0, 'rbond_A': 1.9}
+# initial: PE 0.0000 kcal/mol (0.000000 eV/atom), KE 7601.9979 kcal/mol, T 344.70 K, |F| rms 0.000 kcal/mol/A, sum F 0.00e+00
+  step               PE           KE               TE   ms/step  mlip_ms
+  1000         583.1574    7024.5318        7607.6892       1.3      1.2
+# TE: drift -0.00007 kcal/mol/fs, sd about the fit 0.5720 kcal/mol, mean minus initial +3.6186; T mean 320.57 K (sd 1.21)
+=== done: 1000 steps in 1.4 s (1.4 ms/step; MLIP 1.2 ms/step, 1001 evaluations) ===
+restart: /home/dd_linux/gomd_run/md-output/mlip_mock_nve_dt1.0_restart.xyz

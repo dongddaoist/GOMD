@@ -1,0 +1,27 @@
+# GOMD ensemble check (nvt)  2026-11-17 22:11:11  jax 0.12.0.1  NVIDIA GeForce RTX 5070 Laptop GPU
+# classical; SHAKE 1e-12, drift rebuilds, rcut compaction, shared k-space
+# NVT: Tset 296.15 K, Nose-Hoover chain 1, OmegaQ 0.01 1/fs, ndof 15192, dt 0.5 fs; molecules: FSI- 36, Li+ 36, solvent 320
+## equilibration: 30000 steps (15.0 ps)
+  T per ps: 289 305 295 295 296 296 296 296 296 296 296 296 296 296 296   (6.3 ms/step)
+## production: 40000 steps (20.0 ps), observables every 10 steps
+  T = 296.14 +- 0.11 K   (Tset 296.15)
+  sd(KE) = 57.45 +- 4.18 kcal/mol   canonical sqrt(ndof/2) k Tset = 51.29   ratio 1.120
+  H_ext drift -0.00004 kcal/mol/fs, sd 0.132   (7.1 ms/step)
+  KE along constrained bonds: 0.000% of KE (rms u 0.6 m/s); in temperature units 0.00 K
+  production: translational (COM) temperature per group, 3 dof per molecule:
+    FSI-       36 molecules  T_com =  316.66 +-  5.41 K
+    Li+        36 molecules  T_com =  306.30 +-  6.33 K
+    solvent   320 molecules  T_com =  316.06 +-  3.36 K
+    internal (14016 dof = ndof - 3 x molecules): T =  294.54 +-  0.30 K;  all ndof: T = 296.14 K
+  for reference, the coords.inp velocities (t = 0, before any dynamics):
+    FSI-     T_com =  399.60 K
+    Li+      T_com =  524.08 K
+    solvent  T_com =  546.11 K
+    internal T = 501.38 K;  all ndof T = 503.65 K
+## NVE continuation from the equilibrated NVT state: 20000 steps (no thermostat)
+  TE drift -0.00000 kcal/mol/fs; T = 292.54 K   (7.0 ms/step)
+  NVE: translational (COM) temperature per group, 3 dof per molecule:
+    FSI-       36 molecules  T_com =  310.48 +-  6.40 K
+    Li+        36 molecules  T_com =  298.89 +-  5.74 K
+    solvent   320 molecules  T_com =  305.21 +-  2.83 K
+    internal (14016 dof = ndof - 3 x molecules): T =  291.49 +-  0.26 K;  all ndof: T = 292.54 K

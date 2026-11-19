@@ -112,6 +112,30 @@ def pack_pairs(idx_i, idx_j, x, box, atomtype, c1, ncharge,
     }
 
 
+def town_product(mu, idx_i, idx_j, rx, ry, rz, tfact, three_zf_l5, nat):
+    """Dipole field T.mu at every site: one matrix-vector product of the SCF.
+
+    Per pair (i, j) with r_ij = x_j - x_i: the field at i from mu_j is
+    three_zf_l5*(mu_j.r)*r + tfact*mu_j, and symmetrically at j from mu_i
+    (T is symmetric). Masked pairs carry zero factors.
+    """
+    mu_i = mu[idx_i]; mu_j = mu[idx_j]              # (npairs,3)
+    rij = jnp.stack([rx, ry, rz], axis=1)           # (npairs,3)
+    mjr = jnp.sum(mu_j * rij, axis=1)               # (npairs,)
+    mir = jnp.sum(mu_i * rij, axis=1)
+    pjr = three_zf_l5 * mjr                          # to atom i from mu_j
+    pir = three_zf_l5 * mir                          # to atom j from mu_i
+    contrib_i = pjr[:, None] * rij + mu_j * tfact[:, None]
+    contrib_j = pir[:, None] * rij + mu_i * tfact[:, None]
+    # padded (0,0) slots go to a dropped index: adding their zeros into atom 0
+    # serialised the scatter (6.8 -> 3.6 ms per product on an RTX 5070)
+    v = idx_i != idx_j
+    t = jnp.zeros((nat, 3))
+    t = t.at[jnp.where(v, idx_i, nat)].add(contrib_i, mode='drop')
+    t = t.at[jnp.where(v, idx_j, nat)].add(contrib_j, mode='drop')
+    return t
+
+
 @partial(jax.jit, static_argnames=('nat', 'max_iter', 'min_iter'))
 def solve_scf(Efield, alpha_atom, idx_i, idx_j, rx, ry, rz, tfact, three_zf_l5,
               mu_init, arf, tolpol, nat, max_iter, min_iter=0):
@@ -132,21 +156,11 @@ def solve_scf(Efield, alpha_atom, idx_i, idx_j, rx, ry, rz, tfact, three_zf_l5,
             original behavior exactly.
 
     Returns:
-        mu: (nat,3) converged dipoles, niter.
+        mu: (nat,3) converged dipoles, niter (= number of T.mu products,
+        including the first one on mu_init).
     """
     def town(mu):
-        mu_i = mu[idx_i]; mu_j = mu[idx_j]              # (npairs,3)
-        rij = jnp.stack([rx, ry, rz], axis=1)           # (npairs,3)
-        mjr = jnp.sum(mu_j * rij, axis=1)               # (npairs,)
-        mir = jnp.sum(mu_i * rij, axis=1)
-        pjr = three_zf_l5 * mjr                          # to atom i from mu_j
-        pir = three_zf_l5 * mir                          # to atom j from mu_i
-        contrib_i = pjr[:, None] * rij + mu_j * tfact[:, None]
-        contrib_j = pir[:, None] * rij + mu_i * tfact[:, None]
-        t = jnp.zeros((nat, 3))
-        t = t.at[idx_i].add(contrib_i)
-        t = t.at[idx_j].add(contrib_j)
-        return t
+        return town_product(mu, idx_i, idx_j, rx, ry, rz, tfact, three_zf_l5, nat)
 
     def cond(state):
         mu, diff2max, it = state
@@ -170,6 +184,87 @@ def solve_scf(Efield, alpha_atom, idx_i, idx_j, rx, ry, rz, tfact, three_zf_l5,
     return mu, niter
 
 
+@partial(jax.jit, static_argnames=('nat', 'max_iter', 'min_iter'))
+def solve_scf_pcg(Efield, alpha_atom, idx_i, idx_j, rx, ry, rz, tfact, three_zf_l5,
+                  mu_init, arf, tolpol, nat, max_iter, min_iter=0):
+    """Induced dipoles by preconditioned conjugate gradient.
+
+    The SCF condition mu = alpha*(E + T.mu + arf*mu) is the linear system
+        A mu = E,   A = diag(1/alpha - arf) - T     (polarizable sites only),
+    with T the symmetric Thole-damped dipole tensor, so A is symmetric and,
+    without a polarization catastrophe, positive definite. CG minimises
+        U(mu) = 1/2 mu.A.mu - E.mu
+    whose minimum is E_pol/COULOMB = -1/2 E.mu. Preconditioner: 1/A_ii.
+
+    Convergence uses the reference metric on the current residual
+    r = E - A.mu: stop when max_i |alpha_i r_i|^2 <= tolpol, i.e. when the
+    next Jacobi step would change no dipole by more than sqrt(tolpol). Unlike
+    the Jacobi step-change test this measures the equation itself, so a warm
+    start (mu_init from a predictor) is safe.
+
+    Same arguments as solve_scf. mu_init=None is a cold start (mu = 0) and
+    skips the product A.0. Sites with alpha = 0 keep mu = 0.
+
+    Returns:
+        mu (nat,3), niter (number of T.mu products), r (nat,3) the final
+        residual E - A.mu (zero on non-polarizable sites). With r, the energy
+        U = -1/2 E.mu - 1/2 mu.r is correct to second order in the error of mu.
+    """
+    pol = alpha_atom > 0.0
+    m = pol[:, None]
+    a_safe = jnp.where(pol, alpha_atom, 1.0)
+    diag = jnp.where(pol, 1.0 / a_safe - arf, 0.0)               # A_ii
+    minv = jnp.where(pol, a_safe / (1.0 - arf * a_safe), 0.0)    # 1 / A_ii
+    jw = jnp.where(pol, alpha_atom, 0.0)                         # Jacobi step = alpha*r
+
+    def amul(p):
+        t = town_product(p, idx_i, idx_j, rx, ry, rz, tfact, three_zf_l5, nat)
+        return jnp.where(m, diag[:, None] * p - t, 0.0)
+
+    def jstep2(r):
+        s = jw[:, None] * r
+        return jnp.max(jnp.sum(s * s, axis=1))
+
+    b = jnp.where(m, Efield, 0.0)
+    if mu_init is None:
+        x0 = jnp.zeros_like(b)
+        r0 = b
+        it0 = 0
+    else:
+        x0 = jnp.where(m, mu_init, 0.0)
+        r0 = b - amul(x0)
+        it0 = 1
+    z0 = minv[:, None] * r0
+    rz0 = jnp.sum(r0 * z0)
+
+    def cond(state):
+        _x, _r, _p, _rz, d2, it = state
+        return ((d2 > tolpol) | (it < min_iter)) & (it < max_iter)
+
+    def body(state):
+        x, r, p, rz, _d2, it = state
+        ap = amul(p)
+        pap = jnp.sum(p * ap)
+        ok = pap > 0.0
+        a = jnp.where(ok, rz / jnp.where(ok, pap, 1.0), 0.0)
+        x = x + a * p
+        r = r - a * ap
+        z = minv[:, None] * r
+        rz_new = jnp.sum(r * z)
+        okb = rz > 0.0
+        beta = jnp.where(okb, rz_new / jnp.where(okb, rz, 1.0), 0.0)
+        p = z + beta * p
+        # p.A.p <= 0: A is not positive definite (polarization catastrophe) or
+        # CG broke down. Stop at once and report niter = max_iter, which the
+        # driver flags as an unconverged SCF.
+        it_next = jnp.where(ok, it + 1, jnp.asarray(max_iter, dtype=it.dtype))
+        return (x, r, p, rz_new, jstep2(r), it_next)
+
+    state0 = (x0, r0, z0, rz0, jstep2(r0), jnp.asarray(it0, dtype=jnp.int32))
+    mu, r, _p, _rz, _d2, niter = jax.lax.while_loop(cond, body, state0)
+    return mu, niter, r
+
+
 def pol_energy(Efield, mu):
     """E_pol = -0.5 * COULOMB * sum_i E_charge_i . mu_i."""
     return -0.5 * COULOMB_CONST * jnp.sum(Efield * mu)
@@ -178,15 +273,22 @@ def pol_energy(Efield, mu):
 # ===========================================================================
 # Polarization forces (M3)
 # ===========================================================================
-@partial(jax.jit, static_argnames=('nat',))
+@partial(jax.jit, static_argnames=('nat', 'fp32_special'))
 def pol_forces(mu, q_atom, alpha_ew, idx_i, idx_j,
                rx, ry, rz, rr, rrinv, c1ij_pair, expc1r3_pair,
                tau_pair, dtau_pair, nat,
-               q_i_override=None, q_j_override=None):
+               q_i_override=None, q_j_override=None,
+               erfc_tab=None, exp_tab=None, dx_inv=None, fp32_special=False):
     """Induced-dipole forces (before COULOMB scaling). Vectorized over pairs.
 
-    Ported from reference compute_pol_forces. Uses exact erfc (matches the
-    reference's fine erfc table to ~1e-7).
+    Ported from reference compute_pol_forces. erfc(alpha r) and exp(-(alpha r)^2):
+      * erfc_tab/exp_tab/dx_inv given (pol_field.build_ewald_tables): the
+        reference's own 16,384-knot tables with linear interpolation, exactly
+        as compute_pol_forces and the SCF field use them (default in
+        polarization_full since 2026-11-17: the exact fp64 erfc made this
+        the most expensive kernel of the step);
+      * fp32_special: both evaluated in fp32 (benchmark variant);
+      * otherwise exact fp64 (agrees with the tables to ~1e-7).
 
     Args (all (npairs,) unless noted):
         mu: (nat,3) converged dipoles.
@@ -238,8 +340,17 @@ def pol_forces(mu, q_atom, alpha_ew, idx_i, idx_j,
     p6 = (3.0 * r5inv * pir * pjr * dlamda5 - pipj * r3inv * dlamda3) * rinv
 
     alphar = alpha_ew * r
-    erfc_v = erfc_exact(alphar)
-    exp_v = jnp.exp(-alphar * alphar)
+    if erfc_tab is not None:
+        from .pol_field import _tab_lookup
+        erfc_v = _tab_lookup(alphar, erfc_tab, dx_inv)
+        exp_v = _tab_lookup(alphar, exp_tab, dx_inv)
+    elif fp32_special:
+        a32 = alphar.astype(jnp.float32)
+        erfc_v = erfc_exact(a32).astype(alphar.dtype)
+        exp_v = jnp.exp(-a32 * a32).astype(alphar.dtype)
+    else:
+        erfc_v = erfc_exact(alphar)
+        exp_v = jnp.exp(-alphar * alphar)
     ee1 = erfc_v * r3inv
     ee2 = zinv * twoalphapi * exp_v
     ee3 = ee2 * (3.0 + 2.0 * alphar * alphar)
@@ -255,9 +366,10 @@ def pol_forces(mu, q_atom, alpha_ew, idx_i, idx_j,
     ffz = f1 * rz + f2 * mu_j[:, 2] + f3 * mu_i[:, 2]
     ff = jnp.stack([ffx, ffy, ffz], axis=1)
 
+    v = idx_i != idx_j                     # padded (0,0) slots: dropped, not added to atom 0
     f = jnp.zeros((nat, 3))
-    f = f.at[idx_i].add(ff)
-    f = f.at[idx_j].add(-ff)
+    f = f.at[jnp.where(v, idx_i, nat)].add(ff, mode='drop')
+    f = f.at[jnp.where(v, idx_j, nat)].add(-ff, mode='drop')
     vir = -jnp.sum(ffx * rx + ffy * ry + ffz * rz)
     return f, vir
 

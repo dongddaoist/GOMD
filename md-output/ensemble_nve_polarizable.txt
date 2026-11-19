@@ -1,0 +1,10 @@
+# GOMD ensemble check (nve)  2026-11-17 21:27:15  jax 0.12.0.1  NVIDIA GeForce RTX 5070 Laptop GPU
+# polarizable, tolpol 1e-08 (PCG + predict); SHAKE 1e-12, drift rebuilds, rcut compaction, shared k-space
+  dt  0.25 fs   4000 steps  TE drift -0.00087 kcal/mol/fs  sd(TE) 0.3840  sd(KE) 124.92  sd(TE)/sd(KE) 3.1e-03  KE along constrained bonds 0.000% of KE (rms u 0.2 m/s)  22.4 ms/step
+  dt  0.50 fs   2000 steps  TE drift -0.00039 kcal/mol/fs  sd(TE) 0.4200  sd(KE) 125.24  sd(TE)/sd(KE) 3.4e-03  KE along constrained bonds 0.000% of KE (rms u 1.0 m/s)  23.1 ms/step
+  dt  1.00 fs   1000 steps  TE drift +0.00066 kcal/mol/fs  sd(TE) 0.7697  sd(KE) 124.36  sd(TE)/sd(KE) 6.2e-03  KE along constrained bonds 0.000% of KE (rms u 4.0 m/s)  25.2 ms/step
+
+## fluctuation scaling (velocity Verlet: sd(TE) ~ dt^2)
+  dt  0.25: sd(TE)/sd(TE at 0.25) =   1.00   (dt/0.25)^2 =   1.00
+  dt  0.50: sd(TE)/sd(TE at 0.25) =   1.09   (dt/0.25)^2 =   4.00
+  dt  1.00: sd(TE)/sd(TE at 0.25) =   2.00   (dt/0.25)^2 =  16.00

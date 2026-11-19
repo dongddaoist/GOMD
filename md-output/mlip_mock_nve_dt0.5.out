@@ -1,0 +1,19 @@
+# GOMD MLIP MD  2026-11-17 23:20:01  input md-input2/system.xyz
+# 7400 atoms (H2880 Li36 C1920 N36 O784 F1672 S72), box 46.9566 x 46.9566 x 46.9566 A, charge 0, spin 1, ndof 22197 (no constraints), dt 0.5 fs, NVE
+# MLIP mock ready in 1.9 s: {'backend': 'mock', 'pairs': 8363, 'k_eV_A2': 10.0, 'rbond_A': 1.9}
+# initial: PE 0.0000 kcal/mol (0.000000 eV/atom), KE 7601.9979 kcal/mol, T 344.70 K, |F| rms 0.000 kcal/mol/A, sum F 0.00e+00
+  step               PE           KE               TE   ms/step  mlip_ms
+  2000         578.0254    7025.3361        7603.3614       1.3      1.2
+# TE: drift -0.00003 kcal/mol/fs, sd about the fit 0.1394 kcal/mol, mean minus initial +1.2305; T mean 320.58 K (sd 1.21)
+#   fd-check atom  4712 C  x  F   -1.83961  -dE/dx   -1.83950  rel diff 5.5e-05
+#   fd-check atom  4712 C  y  F   +0.62608  -dE/dx   +0.62606  rel diff 3.1e-05
+#   fd-check atom  4712 C  z  F   +1.52648  -dE/dx   +1.52647  rel diff 1.0e-05
+#   fd-check atom  3782 F  x  F   +0.15247  -dE/dx   +0.15244  rel diff 1.9e-04
+#   fd-check atom  3782 F  y  F   -0.33305  -dE/dx   -0.33303  rel diff 5.5e-05
+#   fd-check atom  3782 F  z  F   +0.11004  -dE/dx   +0.11001  rel diff 2.1e-04
+#   fd-check atom  6292 C  x  F   -7.08409  -dE/dx   -7.08412  rel diff 4.7e-06
+#   fd-check atom  6292 C  y  F   +0.84640  -dE/dx   +0.84633  rel diff 8.3e-05
+#   fd-check atom  6292 C  z  F   +1.55612  -dE/dx   +1.55611  rel diff 4.6e-06
+# fd-check at the final configuration (h = 0.001 A, |F| floor 0.01): max rel diff 2.1e-04
+=== done: 2000 steps in 2.7 s (1.3 ms/step; MLIP 1.2 ms/step, 2019 evaluations) ===
+restart: /home/dd_linux/gomd_run/md-output/mlip_mock_nve_dt0.5_restart.xyz
