@@ -1,7 +1,7 @@
 # GOMD — Complete Technical Documentation
 
 **GOMD (GPU-accelerated Open MD)** is a from-scratch JAX/GPU molecular dynamics
-engine for the **APPLE&P polarizable force field**. It reproduces a validated
+engine for the ** polarizable force field (APPLE&P, AMOEBA or similar)**. It reproduces a validated
 Python/Fortran reference (kept in `pkg/`) bit-for-bit and owns every layer of
 the science stack, so the polarization SCF can later be replaced by ML
 (roadmap step 3).
@@ -24,7 +24,7 @@ the Python 3.8 grammar of the older OSC Pitzer environment (V100, JAX 0.4.13).
 | Milestone | What | State |
 |-----------|------|-------|
 | M1 | JAX scaffold (pytree state, velocity Verlet) | done (scaffold code retired) |
-| M2 | Full **classical** APPLE&P MD | done, validated |
+| M2 | Full **classical** APPLE&P MD accuracy comparison | done, validated |
 | M3 | **Polarization** — field, SCF, energy, forces — wired into the step loop | done, validated |
 | M4 | Performance: on-device neighbor list, `lax.scan` loop, `segment_sum` pair kernel, PCG with a predicted SCF start | done |
 | M5 | NVT (Nose–Hoover chain); MLIP provider (UMA via fairchem) run alongside the PFF or driving the dynamics; Colab runner; self-test | done (UMA validated on a Colab L4, §6) |
