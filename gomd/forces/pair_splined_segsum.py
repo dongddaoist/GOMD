@@ -69,8 +69,10 @@ def splined_pair_energy_force_segsum(
     fvec = ff[:, None] * dx                          # (npairs,3) on atom i
 
     # --- segment_sum scatter (replaces two atomic .at[].add) ---
-    # +fvec accumulates on idx_i, -fvec on idx_j; one fused reduction.
-    seg_idx = jnp.concatenate([idx_i, idx_j])
+    # +fvec accumulates on idx_i, -fvec on idx_j; one fused reduction. Pairs
+    # outside the cut and padded (0,0) slots get segment id nat, which
+    # segment_sum drops (adding padding zeros into atom 0 serialised it).
+    seg_idx = jnp.concatenate([jnp.where(in_cut, idx_i, nat), jnp.where(in_cut, idx_j, nat)])
     seg_val = jnp.concatenate([fvec, -fvec])
     forces = jax.ops.segment_sum(seg_val, seg_idx, num_segments=nat)
 

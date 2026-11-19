@@ -106,9 +106,10 @@ def _field_pairs_tab(x, q, idx_i, idx_j, box, el, alpha, rcut2,
     fact = (erfc_v * rinv + twoalphapi * exp_v) * zinv * scale
     fact = jnp.where(good, fact, 0.0)
     ci = q[idx_i]; cj = q[idx_j]
+    # pairs outside the cut and padded (0,0) slots go to a dropped index
     E = jnp.zeros((nat, 3))
-    E = E.at[idx_i].add(-(fact * cj)[:, None] * d)
-    E = E.at[idx_j].add((fact * ci)[:, None] * d)
+    E = E.at[jnp.where(good, idx_i, nat)].add(-(fact * cj)[:, None] * d, mode='drop')
+    E = E.at[jnp.where(good, idx_j, nat)].add((fact * ci)[:, None] * d, mode='drop')
     return E
 
 

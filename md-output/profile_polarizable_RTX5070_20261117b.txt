@@ -1,0 +1,118 @@
+# GOMD profile  2026-11-17 16:22:16  jax 0.12.0.1  device gpu: NVIDIA GeForce RTX 5070 Laptop GPU
+# args: --input-dir ./md-input --ref-dir ./pkg --polarizable --tolpol 1e-8 --out md-output/profile_polarizable_RTX5070_20261117b.txt
+# system: 8716 sites (1316 lone-pair), loaded in 21.0 s
+# ensemble for the integrator timings: NVT
+
+## 1. device throughput
+  elementwise fp32 (4M x 50 sqrt+exp)                       3.851 ms   (first call   0.05 s)
+  elementwise fp64 (4M x 50 sqrt+exp)                      35.637 ms   (first call   0.18 s)
+  -> fp64 / fp32 = 9.3x
+
+## 2. neighbor list
+  neighbor build (all pairs on device)                     12.752 ms   (first call   1.00 s)
+  pair compaction to rcut + 0.05 A (every step)             1.301 ms   (first call   0.09 s)
+  pairs in rlist 3,354,521  inside rcut 2,635,584 (79%)  list capacity 4,193,150; compacted 2,669,118 into 2,936,029 slots -> the pair kernels process 1.11x the pairs that interact (1.59x without compaction)
+  scatter fp64, 2 x capacity rows, padding into atom 0      4.628 ms   (first call   0.03 s)
+  scatter fp64, same rows, padding dropped                  2.437 ms   (first call   0.03 s)
+  scatter fp32 segment_sum, padding dropped                 2.436 ms   (first call   0.03 s)
+  gather fp64 x[i], x[j] (capacity pairs)                   1.407 ms   (first call   0.03 s)
+  (the force phases below run on the compacted list, as the MD step does)
+
+## 3. force phases (one evaluation each)
+  pair vdW + real-space elec (fp32 segsum)                  2.515 ms   (first call   0.24 s)
+  bonds                                                     1.264 ms   (first call   0.13 s)
+  bends                                                     1.290 ms   (first call   0.17 s)
+  torsions                                                  1.392 ms   (first call   0.26 s)
+  Ewald reciprocal (709 k-vectors)                          4.688 ms   (first call   6.51 s)
+  Ewald exclusion correction                                1.325 ms   (first call   0.16 s)
+  = classical total (compute_all_forces)                    7.970 ms   (first call   0.51 s)
+  lone-pair site placement                                  0.226 ms   (first call   0.00 s)
+  lone-pair force redistribution                            1.365 ms   (first call   0.20 s)
+  pol: pair geometry + Thole factors                        2.423 ms   (first call   0.10 s)
+  pol field: real-space pairs (tabulated erfc)              3.556 ms   (first call   0.10 s)
+  pol field: 1-4 fold-in                                    1.287 ms   (first call   0.18 s)
+  pol field: reciprocal                                     4.783 ms   (first call   4.95 s)
+  pol field: exclusion correction                           1.325 ms   (first call   0.29 s)
+  pol field: 1-4 correction                                 1.263 ms   (first call   0.27 s)
+  = pol field total                                         6.903 ms   (first call   0.33 s)
+  pol SCF: one T.mu product                                 2.483 ms   (first call   0.06 s)
+  pol SCF: pcg, tolpol 1e-08                               11.292 ms   (first call   0.22 s)
+  -> 5 T.mu products; 2.258 ms each (one bare product 2.483 ms)
+  pol forces: main pair term (phase 5)                      7.845 ms   (first call   0.23 s)
+  pol forces: exclusion correction (6)                      1.342 ms   (first call   0.15 s)
+  pol forces: 1-4 correction (7)                            1.312 ms   (first call   0.14 s)
+  pol forces: k-space charge-dipole (autodiff)              5.703 ms   (first call   1.34 s)
+  = pol forces total                                       15.700 ms   (first call   0.45 s)
+  = polarization total (geometry+field+SCF+E+F)            30.819 ms   (first call   0.83 s)
+  == force_fn: everything above + lone pairs               31.375 ms   (first call   1.41 s)
+  pre_force: [NHC] kick drift SHAKE                         1.397 ms   (first call   0.42 s)
+  post_force: SHAKE pred.-corr. kick [NHC]                  2.532 ms   (first call   0.43 s)
+  SHAKE alone, tol 1e-12                                    1.305 ms   (first call   0.10 s)
+  -> 10 Jacobi sweeps over 7008 constraints
+
+## 4. MD step in lax.scan (NVT), no neighbor rebuild, 200 steps from coords.inp
+  compile + first 25 steps: 2.9 s
+    step   t (fs)   ms/step  max drift A  missed pairs  scf_it
+      25     12.5     38.83        0.732             0    2.16
+      50     25.0     46.32        0.882             1    2.24
+      75     37.5     46.17        1.136            43    2.24
+     100     50.0     46.37        1.470           139    2.32
+     125     62.5     46.06        1.849           468    2.28
+     150     75.0     46.29        2.064           849    2.32
+     175     87.5     45.96        2.092          1601    2.24
+     200    100.0     46.39        2.250          2423    2.32
+  -> 46.23 ms/step (median over chunks); a rebuild costs about 12.75 ms (build only; the MD loop adds two cheap pair counts) = 0.28 steps
+  -> a list is valid while max drift < skin/2 = 0.5 A; the MD driver rebuilds at 0.49 A (or every --rebuild-every steps)
+
+## budget (ms, one evaluation each; the fused MD step is the real number)
+     11.292   18.4%  pol SCF: pcg, tolpol 1e-08
+      7.845   12.8%  pol forces: main pair term (phase 5)
+      5.703    9.3%  pol forces: k-space charge-dipole (autodiff)
+      4.783    7.8%  pol field: reciprocal
+      4.688    7.6%  Ewald reciprocal (709 k-vectors)
+      3.556    5.8%  pol field: real-space pairs (tabulated erfc)
+      2.532    4.1%  post_force: SHAKE pred.-corr. kick [NHC]
+      2.515    4.1%  pair vdW + real-space elec (fp32 segsum)
+      2.423    3.9%  pol: pair geometry + Thole factors
+      1.397    2.3%  pre_force: [NHC] kick drift SHAKE
+      1.392    2.3%  torsions
+      1.365    2.2%  lone-pair force redistribution
+      1.342    2.2%  pol forces: exclusion correction (6)
+      1.325    2.2%  pol field: exclusion correction
+      1.325    2.2%  Ewald exclusion correction
+      1.312    2.1%  pol forces: 1-4 correction (7)
+      1.301    2.1%  pair compaction to rcut + 0.05 A (every step)
+      1.290    2.1%  bends
+      1.287    2.1%  pol field: 1-4 fold-in
+      1.264    2.1%  bonds
+      1.263    2.1%  pol field: 1-4 correction
+      0.226    0.4%  lone-pair site placement
+     61.425  sum of the phases (+ neighbor build / interval)
+     46.229  measured MD step in lax.scan
+
+## 5. SCF solvers at the initial configuration (cold start)
+  references: PCG 18 products (residual 1.3e-27), Jacobi 35 products (residual 1.2e-27); max|mu_pcg - mu_jac| = 4.85e-14 (max|mu| 0.338); E_pol -7045.060548 vs -7045.060548 kcal/mol
+  solver    tolpol  T.mu        ms   max|dmu|   rms|dmu|   E_pol err   E_var err   (errors vs the PCG reference, kcal/mol)
+  scf jacobi 0.0001                                        11.665 ms   (first call   0.01 s)
+  jacobi     1e-04     4     11.66   2.28e-03   3.58e-04    +19.0730     +0.2853
+  scf pcg 0.0001                                            6.300 ms   (first call   0.01 s)
+  pcg        1e-04     2      6.30   9.71e-03   1.82e-03     +5.6644     +5.6644
+  scf jacobi 1e-06                                         20.076 ms   (first call   0.02 s)
+  jacobi     1e-06     7     20.08   1.72e-04   2.23e-05     -0.7092     +0.0011
+  scf pcg 1e-06                                            12.535 ms   (first call   0.01 s)
+  pcg        1e-06     4     12.53   4.23e-04   5.88e-05     +0.0058     +0.0058
+  scf jacobi 1e-08                                         28.675 ms   (first call   0.03 s)
+  jacobi     1e-08    10     28.67   1.37e-05   1.64e-06     +0.0428     +0.0000
+  scf pcg 1e-08                                            15.126 ms   (first call   0.02 s)
+  pcg        1e-08     5     15.13   8.12e-05   1.13e-05     +0.0002     +0.0002
+  scf jacobi 1e-10                                         34.035 ms   (first call   0.03 s)
+  jacobi     1e-10    12     34.04   2.62e-06   2.97e-07     +0.0068     +0.0000
+  scf pcg 1e-10                                            20.279 ms   (first call   0.02 s)
+  pcg        1e-10     7     20.28   3.91e-06   3.60e-07     +0.0000     +0.0000
+  scf jacobi 1e-12                                         42.475 ms   (first call   0.04 s)
+  jacobi     1e-12    15     42.47   2.20e-07   2.37e-08     -0.0005     +0.0000
+  scf pcg 1e-12                                            23.289 ms   (first call   0.02 s)
+  pcg        1e-12     8     23.29   7.26e-07   6.63e-08     +0.0000     +0.0000
+  (E_pol err: the -1/2 E.mu energy the Jacobi path logs; E_var err: the variational energy the PCG path logs)
+
+# done

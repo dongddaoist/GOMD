@@ -1,0 +1,23 @@
+# GOMD MLIP MD  2026-11-18 09:21:52  input md-input2/sphere_2000.xyz
+# 2002 atoms (H774 Li11 C516 N11 O216 F452 S22), cluster, no PBC (frame 72.9767 x 72.9767 x 72.9767) A, charge 0, spin 1, ndof 6003 (no constraints), dt 0.5 fs, NVE
+# MLIP mock ready in 0.2 s: {'backend': 'mock', 'pairs': 2255, 'k_eV_A2': 10.0, 'rbond_A': 1.9, 'pbc': False}
+# initial: PE 0.0000 kcal/mol (0.000000 eV/atom), KE 2104.9080 kcal/mol, T 352.92 K, |F| rms 0.000 kcal/mol/A, sum F 0.00e+00
+  step               PE           KE               TE   ms/step  mlip_ms
+    10          95.6726    2009.5227        2105.1952       0.6      0.6
+    20         165.2860    1940.2409        2105.5269       0.4      0.4
+    30         106.3189    1999.0998        2105.4187       0.3      0.3
+    40         113.3267    1991.9701        2105.2968       0.3      0.3
+# TE: drift -0.01339 kcal/mol/fs, sd about the fit 0.1646 kcal/mol, mean minus initial +0.3314; T mean 334.56 K (sd 5.47)
+# energy probe: |E| = 113.3 kcal/mol (fp32 step there ~ 1.35e-05); same configuration again: dE +0.000e+00
+#   atom 1077 (C) moved 0.0001 A along F: dE -0.003496 kcal/mol, expected -|F| s = -0.003498
+#   atom 1077 (C) moved 0.001 A along F: dE -0.034786 kcal/mol, expected -|F| s = -0.034983
+#   atom 1077 (C) moved 0.01 A along F: dE -0.330177 kcal/mol, expected -|F| s = -0.349832
+#   fd-check atom  1702 H  x  F   +5.96234  -dE/dx   +5.96234  diff +5.36e-07  rel diff 9.0e-08
+#   fd-check atom  1702 H  y  F   -3.27898  -dE/dx   -3.27898  diff +3.11e-07  rel diff 9.5e-08
+#   fd-check atom  1702 H  z  F   -4.37316  -dE/dx   -4.37316  diff -3.29e-07  rel diff 7.5e-08
+#   fd-check atom  1275 C  x  F   -2.01867  -dE/dx   -2.01867  diff +1.73e-07  rel diff 8.6e-08
+#   fd-check atom  1275 C  y  F   +0.35336  -dE/dx   +0.35336  diff -1.60e-07  rel diff 4.5e-07
+#   fd-check atom  1275 C  z  F   -1.20608  -dE/dx   -1.20608  diff -7.99e-07  rel diff 6.6e-07
+# fd-check at the final configuration (4-point stencil, h = 0.01 A, |F| floor 0.01): max rel diff 6.6e-07, max abs diff 7.99e-07 kcal/mol/A
+=== done: 40 steps in 0.0 s (0.4 ms/step; MLIP 0.4 ms/step, 69 evaluations) ===
+restart: /home/dd_linux/gomd_run/md-output/mlip_mock_sphere_fd4_restart.xyz

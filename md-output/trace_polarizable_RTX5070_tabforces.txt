@@ -1,0 +1,57 @@
+# GOMD fused-step trace  2026-11-17 21:24:01  jax 0.12.0.1  NVIDIA GeForce RTX 5070 Laptop GPU
+# polarizable NVE, 20 steps in lax.scan, tolpol 1e-08 (PCG + predict), drift rebuilds, rcut compaction, shared k-space
+# compile + first run 5.5 s
+# per step: wall 37.47 ms untraced (38.73 traced), kernels 34.56 ms, 328 kernel launches; gaps 4.17 ms  [2 rebuilds in these 20 steps, 2.25 T.mu products/step; events from xplane]
+
+## time per block (ms per MD step, share of kernel time)
+    12.826   37.1%  gomd_pol_forces
+               8.617  pol_forces
+               4.049  compute
+               0.065  qmu_exclusion_correction
+               0.063  _where
+     5.538   16.0%  gomd_pol_scf
+               5.513  solve_scf_pcg
+     5.295   15.3%  gomd_classical
+               2.729  _where
+               2.281  splined_pair_energy_force_segsum
+               0.110  exclusion_correction
+               0.102  torsion_energy_force
+               0.055  bend_energy_force
+     3.300    9.5%  gomd_kspace
+               3.300  -
+     2.894    8.4%  gomd_pol_field
+               2.007  _field_pairs_tab
+               0.839  _where
+     1.630    4.7%  gomd_pol_geometry
+               1.630  compute
+     1.129    3.3%  gomd_nb_rebuild
+               0.588  build_neighbor_ondevice_count
+               0.459  _searchsorted_scan_impl
+     1.040    3.0%  (unlabelled)
+               1.034  -
+     0.496    1.4%  gomd_compact
+               0.496  compact_pairs
+     0.318    0.9%  gomd_post_force
+               0.251  shake_constrain
+               0.052  _where
+     0.050    0.1%  gomd_pre_force
+     0.037    0.1%  gomd_lp_forces
+     0.010    0.0%  gomd_lp_place
+  (1.013 ms/step of kernels had no HLO metadata)
+
+## top 15 kernels (ms per MD step, launches per step, name path, source)
+    3.994   1.0x  loop_add_fusion.9                      jit(compute)/gomd_pol_forces/jit(pol_forces)/add  
+    3.163   1.0x  input_scatter_fusion.17                jit(compute)/gomd_pol_forces/jit(pol_forces)/scatter-add  
+    2.706   1.0x  loop_and_compare_convert_divide_gather gomd_classical/jit(splined_pair_energy_force_segsum)/jit(_where)/select_n  
+    1.932   1.2x  input_scatter_fusion.5                 jit(compute)/gomd_pol_scf/jit(solve_scf_pcg)/scatter-add  
+    1.822   1.0x  input_add_reduce_subtract_fusion       gomd_kspace/dot_general  
+    1.690   1.0x  input_scatter_fusion.40                gomd_classical/jit(splined_pair_energy_force_segsum)/scatter-add  
+    1.580   1.0x  input_scatter_fusion.20                jit(compute)/gomd_pol_scf/jit(solve_scf_pcg)/scatter-add  
+    1.514   1.0x  input_scatter_fusion.28                jit(compute)/gomd_pol_field/jit(_field_pairs_tab)/scatter-add  
+    1.460   1.0x  input_scatter_fusion.18                jit(compute)/gomd_pol_forces/jit(pol_forces)/scatter-add  
+    1.112   1.0x  gemm_fusion_dot_general.20             jit(compute)/gomd_pol_forces/dot_general  
+    0.938   1.0x  input_multiply_reduce_fusion.1         jit(compute)/gomd_pol_forces/mul  
+    0.763   1.0x  loop_select_fusion.8                   jit(compute)/gomd_pol_field/jit(_field_pairs_tab)/jit(_where)/select_n  
+    0.755   1.2x  loop_multiply_fusion.2                 jit(compute)/gomd_pol_scf/jit(solve_scf_pcg)/mul  
+    0.693   1.0x  gemm_fusion_dot_general.22             jit(compute)/gomd_pol_forces/dot_general  
+    0.690   1.0x  gemm_fusion_dot_general.19             gomd_kspace/dot_general  

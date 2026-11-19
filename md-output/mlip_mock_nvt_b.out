@@ -1,0 +1,11 @@
+# GOMD MLIP MD  2026-11-17 23:20:43  input md-output/mlip_mock_nvt_a_restart.xyz
+# 7400 atoms (H2880 Li36 C1920 N36 O784 F1672 S72), box 46.9566 x 46.9566 x 46.9566 A, charge 0, spin 1, ndof 22197 (no constraints), dt 0.5 fs, NVT 296.15 K (NHC chain 1, OmegaQ 0.01 1/fs)
+# MLIP mock ready in 2.0 s: {'backend': 'mock', 'pairs': 27934, 'k_eV_A2': 10.0, 'rbond_A': 1.9}
+# initial: PE 0.0000 kcal/mol (0.000000 eV/atom), KE 6712.9037 kcal/mol, T 304.39 K, |F| rms 0.000 kcal/mol/A, sum F 0.00e+00
+# NHC chain state from the input file
+  step               PE           KE               TE        T            H_ext   ms/step  mlip_ms
+   500        4872.5193    9439.0673       14311.5866   428.00        7100.3811       9.0      3.1
+  1000        3134.4749    4535.5326        7670.0075   205.66        7087.9538       7.8      2.9
+# H_ext: drift -0.00965 kcal/mol/fs, sd about the fit 3.4734 kcal/mol, mean minus initial +13.9455; T mean 315.37 K (sd 85.23)
+=== done: 1000 steps in 8.6 s (8.6 ms/step; MLIP 3.0 ms/step, 1001 evaluations) ===
+restart: /home/dd_linux/gomd_run/md-output/mlip_mock_nvt_b_restart.xyz

@@ -113,8 +113,8 @@ def splined_pair_energy_force(
     fvec = ff[:, None] * dx            # (npairs, 3)
 
     forces = jnp.zeros((nat, 3))
-    forces = forces.at[idx_i].add(fvec)
-    forces = forces.at[idx_j].add(-fvec)
+    forces = forces.at[jnp.where(in_cut, idx_i, nat)].add(fvec, mode="drop")   # padding dropped
+    forces = forces.at[jnp.where(in_cut, idx_j, nat)].add(-fvec, mode="drop")
 
     unbd = jnp.sum(energy)
     return unbd, forces
@@ -164,8 +164,8 @@ def splined_pair_energy_force_fp32(
 
     fvec = ff[:, None] * dx
     forces = jnp.zeros((nat, 3), dtype=jnp.float32)
-    forces = forces.at[idx_i].add(fvec)
-    forces = forces.at[idx_j].add(-fvec)
+    forces = forces.at[jnp.where(in_cut, idx_i, nat)].add(fvec, mode="drop")   # padding dropped
+    forces = forces.at[jnp.where(in_cut, idx_j, nat)].add(-fvec, mode="drop")
 
     # cast back to fp64 for the rest of the pipeline
     return jnp.sum(energy).astype(jnp.float64), forces.astype(jnp.float64)

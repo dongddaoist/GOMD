@@ -12,8 +12,9 @@ COULOMB:
            (on). Only the active branch is ported; the structure mirrors the
            reference so the other can be added if a system needs it.
 
-Phase 8 (recipQmu, k-space Q-mu) is a TODO in the reference itself and is NOT
-applied to the reference forces, so parity does not require it.
+Phase 8 (recipQmu, k-space Q-mu) is a TODO in the reference and missing from
+its forces. GOMD adds it in polarization_full.py (recip_qmu_force, autodiff at
+fixed dipoles); without it the polarizable forces are not the gradient of E_pol.
 
 All use the A&S erf/erfc polynomials (erf_approx/erfc_approx) exactly as the
 reference correction routines do, and the single-shift min image (el = box/2).

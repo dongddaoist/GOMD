@@ -257,8 +257,9 @@ def compute_torsion_forces(
         elif cosphi < -1.0:
             cosphi = -1.0
         
-        # Sign from triple product
-        sign = rij[0]*n[0] + rij[1]*n[1] + rij[2]*n[2]
+        # Sign from triple product. Must match the dphi/dx formulas below (IUPAC,
+        # b1 = x_j - x_i = -rij); the energy is even in phi, so only F depends on it.
+        sign = -(rij[0]*n[0] + rij[1]*n[1] + rij[2]*n[2])
         sinphi = np.sqrt(1.0 - cosphi*cosphi)
         if sign < 0:
             sinphi = -sinphi
@@ -289,12 +290,15 @@ def compute_torsion_forces(
         # Force derivatives
         rijdotrjk = rij[0]*rjk[0] + rij[1]*rjk[1] + rij[2]*rjk[2]
         rjkdotrkl = rjk[0]*rkl[0] + rjk[1]*rkl[1] + rjk[2]*rkl[2]
-        
+        # The j/k formulas are written for r_kj = x_k - x_j; rjk here is x_j - x_k.
+        aa = -rijdotrjk / rjk2
+        bb = -rjkdotrkl / rjk2
+
         for i in range(3):
             dphi_di = -rjk_mag * mm_inv * m[i]
             dphi_dl = rjk_mag * nn_inv * n[i]
-            dphi_dj = (rijdotrjk / rjk2 - 1.0) * dphi_di - (rjkdotrkl / rjk2) * dphi_dl
-            dphi_dk = (rjkdotrkl / rjk2 - 1.0) * dphi_dl - (rijdotrjk / rjk2) * dphi_di
+            dphi_dj = (aa - 1.0) * dphi_di - bb * dphi_dl
+            dphi_dk = (bb - 1.0) * dphi_dl - aa * dphi_di
             
             f[i, iat] -= dedphi * dphi_di
             f[i, jat] -= dedphi * dphi_dj

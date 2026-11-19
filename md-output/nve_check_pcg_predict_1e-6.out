@@ -1,0 +1,351 @@
+# GOMD scan log  devices=[CudaDevice(id=0)]  jax 0.12.0.1
+ensemble: NVE  ndof = 15192
+SHAKE: 7008 constraints, tol 1e-12 (reference 1e-06), max 100 iterations
+neighbor pairs: 3354520, padded capacity: 4193150
+polarization: ENABLED (full induced-dipole SCF each step, pcg solver, predict start, tolpol 1e-06, max 300 iterations; with k-space charge-dipole force)
+neighbor list: rlist 13 A (skin 1), rebuilt every 100 steps and whenever a site drifts > 0.49 A
+Initial polarizable PE: -3630.6040 kcal/mol  (SCF: 4 T.mu products, E_pol -7045.0548)
+Initial KE: 7601.9979 kcal/mol  T = 503.65 K
+  step             PE           KE             TE  scf_it    ms/step
+    10     -3686.3851    7657.5867      3971.2016    2.00       78.0
+    20     -3701.9670    7673.2370      3971.2699    1.90       95.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    30     -3745.9340    7717.2561      3971.3221    2.00       97.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    40     -3817.1397    7788.4240      3971.2843    2.00       80.8
+    50     -3822.4965    7793.7157      3971.2192    2.00       97.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    60     -3789.3197    7760.6159      3971.2962    2.00       97.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    70     -3777.7168    7749.3705      3971.6537    2.00      104.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    80     -3950.8550    7922.0934      3971.2384    2.00       97.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    90     -3874.3397    7846.0283      3971.6886    2.00       79.0
+   100     -3897.8074    7869.1952      3971.3879    2.00      114.4
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   110     -3826.4416    7798.0259      3971.5843    2.00       89.1
+   120     -3794.5091    7766.1876      3971.6785    2.00       97.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   130     -3864.4731    7835.8350      3971.3619    2.00       96.1
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   140     -3751.8516    7723.5771      3971.7255    2.00       96.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   150     -3857.5740    7828.8231      3971.2492    2.00       78.2
+   160     -3766.8780    7738.4413      3971.5634    2.00       96.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   170     -3760.4891    7732.2038      3971.7147    2.00       96.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   180     -3841.8181    7813.4076      3971.5894    2.00       77.9
+   190     -3741.4674    7713.3220      3971.8547    2.00       96.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   200     -3830.1619    7801.6170      3971.4551    2.00      114.7
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   210     -3816.6293    7788.1720      3971.5427    2.00       51.5
+   220     -3731.8938    7703.8984      3972.0046    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   230     -3898.9770    7870.8514      3971.8744    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   240     -3956.1307    7927.9808      3971.8502    2.00       43.9
+   250     -3910.7903    7882.4659      3971.6756    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   260     -3915.1295    7886.5273      3971.3978    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   270     -3739.8534    7711.9296      3972.0761    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   280     -3900.9822    7872.8245      3971.8424    2.00       43.2
+   290     -3928.2022    7900.0044      3971.8021    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   300     -3794.8171    7767.1451      3972.3279    2.00       73.6
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   310     -3864.2964    7836.3605      3972.0641    2.00       43.3
+   320     -3769.5144    7742.0772      3972.5628    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   330     -3807.2133    7779.7209      3972.5076    2.00       57.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   340     -3856.2748    7828.6226      3972.3478    2.00       43.2
+   350     -3757.2792    7730.0009      3972.7217    2.00       57.1
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   360     -3813.7237    7786.3200      3972.5963    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   370     -3792.9259    7765.5427      3972.6168    2.00       43.2
+   380     -3759.0914    7731.8132      3972.7219    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   390     -3877.6501    7850.1866      3972.5364    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   400     -3889.7007    7862.3709      3972.6702    2.00       71.7
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   410     -3848.5033    7821.2948      3972.7915    2.00       43.5
+   420     -3833.0156    7805.8574      3972.8418    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   430     -3816.4215    7789.3541      3972.9326    2.00       57.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   440     -3871.4443    7844.2440      3972.7997    2.00       43.0
+   450     -3888.0402    7860.7675      3972.7273    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   460     -3834.3709    7807.3138      3972.9429    2.00       58.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   470     -3886.2454    7858.9396      3972.6942    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   480     -3886.6837    7859.3529      3972.6692    2.00       43.3
+   490     -3874.1065    7846.8836      3972.7771    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   500     -3901.3848    7874.2724      3972.8876    2.00       71.6
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   510     -3946.7777    7919.4495      3972.6718    2.00       43.9
+   520     -3944.3022    7916.9631      3972.6609    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   530     -3908.8136    7881.4411      3972.6275    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   540     -3866.8556    7839.4154      3972.5597    2.00       43.4
+   550     -3869.2631    7841.8479      3972.5848    2.00       59.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   560     -3906.8531    7879.4150      3972.5619    2.00       58.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   570     -3905.2072    7877.8808      3972.6736    2.00       43.8
+   580     -3899.3741    7872.1506      3972.7765    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   590     -3957.7894    7930.3115      3972.5221    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   600     -3900.0575    7872.9010      3972.8435    2.00       71.9
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   610     -3958.5586    7931.2143      3972.6557    2.00       43.1
+   620     -4031.2520    8003.8830      3972.6310    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   630     -4028.2528    8000.8132      3972.5604    2.00       58.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   640     -3993.5577    7966.1105      3972.5528    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   650     -3841.2994    7814.3032      3973.0038    2.00       43.5
+   660     -3939.4459    7912.0885      3972.6426    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   670     -3956.8320    7929.6750      3972.8430    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   680     -3959.4003    7932.2882      3972.8879    2.00       43.4
+   690     -4038.0048    8010.5241      3972.5193    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   700     -3946.6812    7919.4834      3972.8021    2.00       71.8
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   710     -3925.0036    7897.8553      3972.8517    2.00       43.3
+   720     -3911.8845    7884.9718      3973.0873    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   730     -4035.3691    8008.2844      3972.9152    2.00       57.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   740     -4046.8530    8019.9074      3973.0544    2.00       43.4
+   750     -4082.3375    8054.9741      3972.6367    2.00       57.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   760     -4028.9921    8001.7095      3972.7174    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   770     -4015.1873    7987.9160      3972.7287    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   780     -4086.3803    8058.8622      3972.4818    2.00       43.3
+   790     -3998.9580    7971.9692      3973.0112    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   800     -4145.9223    8118.2220      3972.2997    2.00       71.6
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   810     -4015.8189    7988.6023      3972.7835    2.00       43.1
+   820     -4026.8900    7999.4598      3972.5698    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   830     -3974.7632    7947.3260      3972.5628    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   840     -3912.1381    7884.9686      3972.8305    2.00       43.2
+   850     -4040.4388    8012.8551      3972.4162    2.00       57.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   860     -3971.4354    7944.2405      3972.8050    2.00       57.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   870     -3929.7272    7902.3848      3972.6576    2.00       57.8
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   880     -3898.0023    7870.7428      3972.7405    2.00       43.3
+   890     -3972.5970    7945.0598      3972.4628    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   900     -3983.6474    7956.2086      3972.5613    2.00       71.5
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+   910     -4060.8769    8033.0976      3972.2207    2.00       43.8
+   920     -3952.4437    7924.9931      3972.5495    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   930     -3961.8583    7934.4487      3972.5904    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   940     -4000.9509    7973.3327      3972.3819    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   950     -3866.9585    7839.9158      3972.9573    2.00       43.3
+   960     -4060.7763    8033.0497      3972.2734    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   970     -3943.5071    7916.3372      3972.8300    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+   980     -4041.8501    8014.2506      3972.4005    2.00       43.5
+   990     -4049.7564    8022.3268      3972.5704    2.00       57.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1000     -3996.2087    7968.8515      3972.6428    2.00       71.6
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1010     -4066.9201    8039.3722      3972.4521    2.00       43.2
+  1020     -4044.9195    8017.4113      3972.4918    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1030     -4000.6619    7973.1786      3972.5166    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1040     -4009.6060    7982.1586      3972.5526    2.00       43.2
+  1050     -3988.3255    7960.7777      3972.4521    1.90       57.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1060     -3875.1928    7848.0739      3972.8811    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1070     -4015.3394    7987.5723      3972.2329    1.90       42.8
+  1080     -4038.4674    8010.8183      3972.3509    1.90       56.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1090     -4042.1525    8014.6663      3972.5138    2.00       59.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1100     -4042.7634    8014.9546      3972.1912    1.90       57.3
+  1110     -3886.7494    7859.3173      3972.5679    2.00       43.3
+  1120     -4008.3312    7980.6411      3972.3099    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1130     -4058.5710    8030.9909      3972.4199    2.00       57.1
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1140     -4039.8021    8012.2792      3972.4771    2.00       43.1
+  1150     -4144.2801    8116.3358      3972.0557    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1160     -4027.9899    8000.2615      3972.2716    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1170     -3957.3543    7929.6661      3972.3117    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1180     -4084.8825    8056.6149      3971.7324    2.00       43.4
+  1190     -4007.9005    7980.1450      3972.2445    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1200     -4127.5728    8099.3272      3971.7545    2.00       71.9
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1210     -4066.3158    8038.1493      3971.8335    2.00       43.8
+  1220     -3905.4777    7877.8120      3972.3343    2.00       58.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1230     -4163.1203    8134.4856      3971.3653    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1240     -4030.3408    8002.5530      3972.2122    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1250     -4111.3137    8083.2768      3971.9631    2.00       43.7
+  1260     -4097.7166    8069.9546      3972.2380    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1270     -3951.4071    7924.0112      3972.6042    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1280     -4108.6011    8080.6952      3972.0940    2.00       57.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1290     -4027.1470    7999.7068      3972.5598    2.00       43.1
+  1300     -4076.8482    8049.2252      3972.3770    2.00       71.9
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1310     -4156.1432    8128.4707      3972.3275    2.00       43.5
+  1320     -4112.9716    8085.4603      3972.4887    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1330     -4048.1049    8020.7772      3972.6723    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1340     -4007.3617    7979.9503      3972.5886    2.00       58.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1350     -3982.0073    7954.7298      3972.7226    2.00       57.8
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1360     -4042.8203    8015.2940      3972.4737    2.00       43.0
+  1370     -4079.0777    8051.6163      3972.5386    2.00       57.8
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1380     -4078.5397    8051.3669      3972.8273    2.00       58.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1390     -4087.5051    8060.2198      3972.7146    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1400     -4051.4867    8024.1405      3972.6539    2.00       57.7
+  1410     -4013.0381    7985.7717      3972.7335    2.00       43.3
+  1420     -3967.8685    7940.9980      3973.1294    2.00       58.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1430     -4063.3940    8036.3591      3972.9651    2.00       57.8
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1440     -4016.8195    7990.1809      3973.3614    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1450     -4084.2044    8057.5043      3973.2999    2.00       58.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1460     -4118.0590    8091.2412      3973.1822    2.00       43.9
+  1470     -4109.1632    8082.5186      3973.3554    2.00       57.8
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1480     -4239.6915    8212.4107      3972.7192    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1490     -3972.5072    7945.7065      3973.1993    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1500     -4078.8365    8051.8074      3972.9709    2.00       58.3
+  1510     -4139.4346    8112.1599      3972.7252    2.00       44.0
+  1520     -4073.9341    8046.8274      3972.8933    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1530     -4209.1535    8181.7297      3972.5762    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1540     -4136.2222    8109.1652      3972.9430    2.00       43.8
+  1550     -4169.9120    8142.6913      3972.7793    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1560     -4113.6386    8086.3664      3972.7278    2.00       57.8
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1570     -4018.0478    7991.0612      3973.0135    2.00       43.5
+  1580     -4181.3534    8153.9686      3972.6151    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1590     -4203.5933    8176.2825      3972.6892    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1600     -4020.9018    7993.9902      3973.0884    2.00       72.3
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1610     -4133.1523    8105.7287      3972.5764    2.00       43.6
+  1620     -4064.3835    8037.3656      3972.9821    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1630     -4019.4379    7992.6308      3973.1929    2.00       58.2
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1640     -4150.7858    8123.6411      3972.8553    2.00       43.3
+  1650     -4043.4230    8016.9948      3973.5718    2.00       58.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1660     -4198.7041    8171.7064      3973.0023    2.00       58.0
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1670     -4102.7917    8075.9711      3973.1794    2.00       57.9
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1680     -4041.7410    8015.0902      3973.3492    2.00       44.1
+  1690     -4200.1525    8172.8704      3972.7179    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1700     -4049.3695    8022.8622      3973.4927    2.00       72.1
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1710     -4099.0486    8072.1877      3973.1391    2.00       43.8
+  1720     -4139.6816    8113.0048      3973.3232    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1730     -4182.1134    8155.1611      3973.0478    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1740     -4127.4855    8100.8297      3973.3442    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1750     -4109.6561    8082.7218      3973.0658    2.00       43.2
+  1760     -3995.1663    7968.6704      3973.5040    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1770     -4124.0296    8097.3906      3973.3610    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1780     -4219.3918    8192.5615      3973.1697    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1790     -4132.5728    8106.1893      3973.6165    2.00       43.4
+  1800     -4272.2255    8245.2632      3973.0377    2.00       71.9
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1810     -4075.8846    8049.5312      3973.6466    2.00       43.3
+  1820     -4092.6329    8066.3157      3973.6828    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1830     -4177.4541    8151.0090      3973.5549    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1840     -4181.2295    8154.9239      3973.6944    2.00       43.3
+  1850     -4208.2126    8181.8913      3973.6787    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1860     -4140.0711    8113.9588      3973.8877    2.00       57.4
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1870     -4115.4140    8089.2140      3973.8000    2.00       58.1
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1880     -4124.1297    8097.9063      3973.7766    2.00       43.3
+  1890     -4175.7267    8149.1922      3973.4656    2.00       57.5
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1900     -4066.3787    8040.3802      3974.0014    2.00       71.9
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1910     -4188.0818    8161.5845      3973.5027    2.00       43.8
+  1920     -4094.5551    8068.3543      3973.7992    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1930     -4110.2829    8084.0288      3973.7459    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1940     -4191.2295    8164.6345      3973.4049    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1950     -4105.7557    8079.7550      3973.9993    2.00       43.1
+  1960     -4212.0366    8185.5764      3973.5398    2.00       57.3
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1970     -4139.3385    8113.2749      3973.9364    2.00       57.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1980     -4149.0315    8122.8560      3973.8245    2.00       57.7
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+  1990     -4142.7238    8116.1590      3973.4353    2.00       43.6
+  2000     -4036.5355    8010.2572      3973.7216    2.00       71.9
+# nb: 2 rebuilds since the last line, 1 of them on drift > 0.49 A
+=== done: 117.3s MD, 58.7 ms/step avg ===
+# neighbor list: 159 rebuilds in 2000 steps (139 on drift alone), peak drift before a rebuild 0.531 A (trigger 0.49 A), max pairs 3355546 / capacity 4193150 (80%), max pairs missed by a stale list 0
+# SCF: 2.00 T.mu products per step on average

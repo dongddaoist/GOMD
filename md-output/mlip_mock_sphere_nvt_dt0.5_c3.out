@@ -1,0 +1,18 @@
+# GOMD MLIP MD  2026-11-18 09:56:21  input md-input2/sphere_2000.xyz
+# 2002 atoms (H774 Li11 C516 N11 O216 F452 S22), cluster, no PBC (frame 72.9767 x 72.9767 x 72.9767) A, charge 0, spin 1, ndof 6003 (no constraints), dt 0.5 fs, NVT 296.15 K (NHC chain 3, OmegaQ 0.01 1/fs)
+# MLIP mock ready in 0.2 s: {'backend': 'mock', 'pairs': 2255, 'k_eV_A2': 10.0, 'rbond_A': 1.9, 'pbc': False}
+# initial: PE 0.0000 kcal/mol (0.000000 eV/atom), KE 2104.9080 kcal/mol, T 352.92 K, |F| rms 0.000 kcal/mol/A, sum F 0.00e+00
+  step               PE           KE               TE        T            H_ext   ms/step  mlip_ms
+   200         136.7819    1850.9245        1987.7064   310.34        2105.4141      21.3      0.7
+   400         122.6186    1767.1254        1889.7440   296.29        2105.2031      18.2      0.7
+   600         124.8849    1716.7186        1841.6035   287.83        2105.2807      18.2      0.6
+   800         127.5599    1748.9473        1876.5071   293.24        2105.0721      17.8      0.6
+  1000         129.4700    1802.5980        1932.0680   302.23        2104.8726      17.5      0.6
+  1200         133.0641    1785.5268        1918.5909   299.37        2104.8166      17.8      0.6
+  1400         127.2396    1736.4139        1863.6536   291.14        2104.7536      17.6      0.6
+  1600         131.4114    1737.5167        1868.9281   291.32        2104.6900      17.7      0.6
+  1800         137.4885    1806.5262        1944.0147   302.89        2104.3871      17.8      0.6
+  2000         139.8302    1806.3576        1946.1878   302.86        2104.2899      17.7      0.6
+# H_ext: drift -0.00115 kcal/mol/fs, sd about the fit 0.0885 kcal/mol, mean minus initial -0.0649; T mean 296.77 K (sd 5.94)
+=== done: 2000 steps in 37.1 s (18.5 ms/step; MLIP 0.6 ms/step, 2001 evaluations) ===
+restart: /home/dd_linux/gomd_run/md-output/mlip_mock_sphere_nvt_dt0.5_c3_restart.xyz

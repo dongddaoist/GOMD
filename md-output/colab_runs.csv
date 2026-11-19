@@ -1,0 +1,2 @@
+stamp,gpu,force_field,ensemble,mlip,propagate,steps,shake_tol,tolpol,ms_per_step,conserved,drift_kcal_mol_fs,log
+20261117-170040,"NVIDIA L4, 23034 MiB, 580.82.07",polarizable,nvt,none,pff,200,,,70.8,H_ext,-0.01745,gomd_polarizable_auto_20261117-170040.out

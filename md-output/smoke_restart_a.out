@@ -1,0 +1,23 @@
+# GOMD scan log  devices=[CudaDevice(id=0)]  jax 0.12.0.1
+ensemble: NVT, Nose-Hoover chain (MTK, 5x5 Yoshida-Suzuki)  T = 296.15 K  chain = 1  OmegaQ = 0.01 1/fs  ndof = 15192
+SHAKE: 7008 constraints, tol 1e-12 (reference 1e-06), max 100 iterations
+neighbor pairs: 3354520, padded capacity: 4193150
+pairs inside rcut + 0.05 A: 2669118; per-step compacted list capacity 2936029
+polarization: ENABLED (full induced-dipole SCF each step, pcg solver, predict start, tolpol 1e-08, max 50 iterations; with k-space charge-dipole force)
+neighbor list: rlist 13 A (skin 1), rebuilt every 100 steps and whenever a site drifts > 0.49 A
+Initial polarizable PE: -3630.6096 kcal/mol  (SCF: 5 T.mu products, E_pol -7045.0603)
+Initial KE: 7601.9979 kcal/mol  T = 503.65 K
+  step             PE           KE             TE         T          H_ext  scf_it    ms/step
+    25     -3740.2399    7580.0156      3839.7757    502.19   -251496.2707    2.16       20.6
+# nb: 1 rebuilds since the last line, 1 of them on drift > 0.49 A
+    50     -3956.1482    7499.4356      3543.2874    496.85   -251496.6566    2.24       23.2
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+    75     -4156.0487    7258.5591      3102.5104    480.89   -251496.6797    2.24       21.2
+# nb: 2 rebuilds since the last line, 2 of them on drift > 0.49 A
+   100     -4400.2467    6936.7989      2536.5522    459.58   -251497.2600    2.32       21.5
+# nb: 3 rebuilds since the last line, 2 of them on drift > 0.49 A
+=== done: 2.2s MD, 21.6 ms/step avg ===
+restart: /home/dd_linux/gomd_run/md-output/smoke_restart_a_restart  (step 100; continue with --input-dir /home/dd_linux/gomd_run/md-output/smoke_restart_a_restart)
+# neighbor list: 8 rebuilds in 100 steps (7 on drift alone), peak drift before a rebuild 0.519 A (trigger 0.49 A), max pairs 3354521 / capacity 4193150 (80%), max pairs missed by a stale list 0
+# pairs inside rcut + 0.05 A per step: max 2669147 / capacity 2936029 (91%)
+# SCF: 2.24 T.mu products per step on average

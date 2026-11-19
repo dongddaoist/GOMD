@@ -1,0 +1,3 @@
+# GOMD MLIP MD  2026-11-18 06:04:42  input /content/drive/MyDrive/GOMD/code/GOMD/md-input2/system.xyz
+# 7400 atoms (H2880 Li36 C1920 N36 O784 F1672 S72), box 46.9566 x 46.9566 x 46.9566 A, charge 0, spin 1, ndof 22197 (no constraints), dt 0.5 fs, NVE
+# MLIP uma ready in 15.0 s: {'backend': 'uma', 'model': 'uma-s-1p2p1', 'task': 'omol', 'settings': 'default', 'device': 'cuda', 'gpu': 'NVIDIA L4', 'fairchem': '2.26.0', 'torch': '2.13.0+cu130', 'load_s': 12.0}

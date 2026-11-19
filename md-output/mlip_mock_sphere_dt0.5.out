@@ -1,0 +1,20 @@
+# GOMD MLIP MD  2026-11-18 00:38:46  input md-input2/sphere_2000.xyz
+# 2002 atoms (H774 Li11 C516 N11 O216 F452 S22), cluster, no PBC (frame 72.9767 x 72.9767 x 72.9767) A, charge 0, spin 1, ndof 6003 (no constraints), dt 0.5 fs, NVE
+# MLIP mock ready in 0.2 s: {'backend': 'mock', 'pairs': 2255, 'k_eV_A2': 10.0, 'rbond_A': 1.9, 'pbc': False}
+# initial: PE 0.0000 kcal/mol (0.000000 eV/atom), KE 2104.9080 kcal/mol, T 352.92 K, |F| rms 0.000 kcal/mol/A, sum F 0.00e+00
+  step               PE           KE               TE   ms/step  mlip_ms
+  1000         143.5338    1961.7394        2105.2732       0.3      0.3
+# TE: drift -0.00001 kcal/mol/fs, sd about the fit 0.0804 kcal/mol, mean minus initial +0.3319; T mean 330.23 K (sd 1.70)
+# energy probe: |E| = 143.5 kcal/mol (fp32 step there ~ 1.71e-05); same configuration again: dE +0.000e+00
+#   atom 976 (C) moved 0.0001 A along F: dE -0.003388 kcal/mol, expected -|F| s = -0.003391
+#   atom 976 (C) moved 0.001 A along F: dE -0.033661 kcal/mol, expected -|F| s = -0.033909
+#   atom 976 (C) moved 0.01 A along F: dE -0.314221 kcal/mol, expected -|F| s = -0.339094
+#   fd-check atom  1702 H  x  F   -1.45463  -dE/dx   -1.45457  rel diff 4.5e-05
+#   fd-check atom  1702 H  y  F   -0.73835  -dE/dx   -0.73836  rel diff 1.6e-05
+#   fd-check atom  1702 H  z  F   +2.37616  -dE/dx   +2.37611  rel diff 2.2e-05
+#   fd-check atom  1275 C  x  F  +12.94799  -dE/dx  +12.94795  rel diff 2.9e-06
+#   fd-check atom  1275 C  y  F  -10.33068  -dE/dx  -10.33066  rel diff 2.0e-06
+#   fd-check atom  1275 C  z  F   +0.42889  -dE/dx   +0.42882  rel diff 1.5e-04
+# fd-check at the final configuration (h = 0.001 A, |F| floor 0.01): max rel diff 1.5e-04
+=== done: 1000 steps in 0.4 s (0.4 ms/step; MLIP 0.3 ms/step, 1017 evaluations) ===
+restart: /home/dd_linux/gomd_run/md-output/mlip_mock_sphere_dt0.5_restart.xyz
