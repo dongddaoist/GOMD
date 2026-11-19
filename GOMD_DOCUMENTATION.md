@@ -6,11 +6,16 @@ Python/Fortran reference (kept in `pkg/`) bit-for-bit and owns every layer of
 the science stack, so the polarization SCF can later be replaced by ML
 (roadmap step 3).
 
-Target system: PEO polymer electrolyte, Li⁺ + FSI⁻, **8,716 sites** (7,400 atoms
-+ 1,316 lone-pair/dummy sites). Runs on Google Colab GPUs (`GOMD_colab.ipynb`,
-current JAX / Python 3.12) and on OSC Pitzer (Tesla V100-PCIE-16GB, conda env
-`newenv2`, JAX 0.4.13, CUDA 11.8, Python 3.8), where the timings below were
-measured. The code is checked against both Python grammars.
+Target systems:
+- `md-input`: PEO polymer electrolyte, Li⁺ + FSI⁻, **8,716 sites** (7,400
+  atoms + 1,316 lone-pair/dummy sites), periodic;
+- `md-input3`: Zn²⁺ electrolyte between two graphite electrodes held at
+  constant potential, **17,544 sites**, slab (§4.23–4.28).
+
+Runs locally on an RTX 5070 Laptop GPU (8 GB) under WSL (`tools/wsl_run.sh`,
+conda env `gomd`), where the timings below were measured, and on Google Colab
+GPUs (`GOMD_colab.ipynb`, current JAX / Python 3.12). The code still keeps to
+the Python 3.8 grammar of the older OSC Pitzer environment (V100, JAX 0.4.13).
 
 ---
 
@@ -21,15 +26,26 @@ measured. The code is checked against both Python grammars.
 | M1 | JAX scaffold (pytree state, velocity Verlet) | done (scaffold code retired) |
 | M2 | Full **classical** APPLE&P MD | done, validated |
 | M3 | **Polarization** — field, SCF, energy, forces — wired into the step loop | done, validated |
-| M4 | Performance: on-device neighbor list, `lax.scan` loop, `segment_sum` pair kernel | done |
-| M5 | NVT (Nose–Hoover chain); MLIP provider (UMA via fairchem) run alongside the PFF or driving the dynamics; Colab runner; self-test | done (UMA itself not yet run on a GPU, §6) |
+| M4 | Performance: on-device neighbor list, `lax.scan` loop, `segment_sum` pair kernel, PCG with a predicted SCF start | done |
+| M5 | NVT (Nose–Hoover chain); MLIP provider (UMA via fairchem) run alongside the PFF or driving the dynamics; Colab runner; self-test | done (UMA validated on a Colab L4, §6) |
+| M6 | Constant-potential electrodes: fixed electrodes, slab (2D) Ewald, PME, constant potential coupled to the induced dipoles | P0–P4 done and validated (§4.23–4.28) |
 
-Measured on the V100 (200-step runs):
+Measured on the RTX 5070 Laptop GPU, 2026-11-17 to 11-19 (NVE runs of
+200–2,000 steps; §7 has the history):
 
-| Force field | ms/step |
-|-------------|---------|
-| Classical | **9.2** (down from ~800 with the host-loop driver) |
-| Full polarizable | **53–58**, 56 average |
+| System | Force field | ms/step |
+|--------|-------------|---------|
+| `md-input`, 8,716 sites, periodic | classical | **6.6** |
+| `md-input` | polarizable (PCG + predicted start, tolpol 1e-8) | **21.6** |
+| `md-input3`, 17,544 sites, 205 Å slab, PME | classical, constant potential at 2 V | **15.7** (16.4 with fixed charges) |
+| `md-input3` | polarizable, fixed electrode charges | **44** |
+| `md-input3` | polarizable, constant potential at 2 V (tolpol 1e-9) | **64** (69 before P4) |
+
+The old Fortran code ran `md-input3` at about 225 ms/step on 40 MPI ranks. The
+laptop GPU switches between two clock states (up to ±50 %), so compare only
+runs made back to back. The V100 numbers quoted before 2026-11-17 (9.2 ms/step
+classical, 56 polarizable) came from the earlier engine; §7 keeps them as
+history.
 
 The 2026-11-16 release also changes two defaults for energy conservation
 (§4.8, §4.14): SHAKE tolerance 1e-12 (the reference's 1e-6 makes the total
@@ -37,8 +53,8 @@ energy ring by ±4 kcal/mol every other step) and the k-space charge–dipole
 polarization force, which the reference omits. `--reference-parity` restores
 the reference behaviour.
 
-In development (not in this tree): hybrid PFF/MLIP regions, the
-constant-potential method, coupled electron–ion transport.
+In development (not in this tree): hybrid PFF/MLIP regions, coupled
+electron–ion transport.
 
 ---
 
@@ -176,7 +192,7 @@ exactly. Forces are scatter-summed, so pair ordering is irrelevant.
   outside 13 Å. Such pairs lie in the skin and every kernel masks them by
   rcut. The earlier claim of a "bit-identical" pair set was off by exactly
   this one pair. Self-test check 7 runs this comparison.
-- `tile`: 512 by default; raise on the V100 (1024–2048) for more parallelism.
+- `tile`: 512 by default; a larger GPU (V100, A100) may gain from 1024–2048.
 - With rcut 12 Å + skin 1 Å the list holds 3,354,520 pairs; capacity
   4,193,150.
 - **Validity checks (2026-11-17)** — written, not yet run on a GPU:
@@ -578,6 +594,12 @@ warm-up compile. MLIP propagation runs one host round trip per step.
 | `--mlip-model`, `--mlip-task`, `--mlip-settings`, `--mlip-device` | uma-s-1p2p1, omol, default, auto | fairchem options |
 | `--mlip-python` | this Python | interpreter for the MLIP server |
 | `--charge`, `--spin` | Σq rounded, 1 | UMA omol |
+| `--electrode-lower`, `--electrode-upper`, `--electrode-geometry`, `--slab-height` | none, flat | fixed electrodes and the slab box (§4.23, §4.24) |
+| `--kspace auto\|explicit\|pme`, `--pme-spacing`, `--pme-order` | auto, 1.0 Å, 6 | auto = PME with electrodes (§4.25) |
+| `--cpm-dv`, `--cpm-psi-lower`, `--electrode-eta` | off, −ΔV/2, 1.979 Å⁻¹ | constant potential (§4.26, §4.27) |
+| `--cpm-ramp` | 0 ps | ramp Ψ from 0 over this time; logs W_psi and TE + W_psi (§4.28) |
+| `--charge-every` | 10 | electrode totals and layer charges to `<out>_charges.csv`; 0 = off |
+| `--poisson-every`, `--poisson-start`, `--poisson-bin` | 10, end of ramp, 0.1 Å | time-averaged Poisson profile to `<out>_poisson.csv`; 0 = off |
 | `--cpu`, `--out` | | |
 
 Log: NVE `step PE KE TE [scf_it] ms/step`; NVT
@@ -595,6 +617,366 @@ Log: NVE `step PE KE TE [scf_it] ms/step`; NVT
 - A summary line closes the run. With an
 MLIP the driver sets `XLA_PYTHON_CLIENT_PREALLOCATE=false` before JAX starts,
 so JAX does not reserve 75% of the GPU the MLIP server also uses.
+
+### 4.28 Constant potential in production runs (P4, 2026-11-19)
+- **Voltage ramp** (`--cpm-ramp PS`). The electrode potentials are s(n)·Ψ,
+  with s(n) = min(1, n·dt / t_ramp) at MD step n. s = 0 at the step-0 force
+  call, so a run starts from the uncharged capacitor (charges induced by the
+  electrolyte only) and the double layer builds over the ramp instead of the
+  electrode charges jumping at step 1. `cpm.solve`, `charge_terms` and
+  `coupled_solve` take the scale; the MD step derives it from `S['step']`.
+  - The ramp counts from step 0 of this run. Leave it off when continuing
+    from a restart that already reached the full potential.
+  - While s changes, the Hamiltonian depends on time and TE is not conserved:
+    the source does work. At fixed positions, dW/ds = −Ψ_full·q (W =
+    min over q, μ of U − sΨ·q; envelope theorem). The driver integrates
+    W_psi = ∫ Ψ_full·q ds by the trapezoid rule over every step and logs
+    `dV`, `W_psi` and `TE+W_psi` (NVE) or `H_ext+W` (NVT). That sum is the
+    conserved quantity through the ramp and after it.
+- **Electrode charge file** (`--charge-every N`, default 10):
+  `<out>_charges.csv` with step, time, the applied ΔV, Q_lower, Q_upper and
+  the charge of every electrode layer, numbered bottom to top in each
+  electrode (the header line gives each layer's z). The layer sums come from
+  the step (`make_md_step(cpm_layer_id=...)`), so they cost nothing extra.
+- **Time-averaged Poisson profile** (`--poisson-every N`, default 10;
+  `--poisson-start`, default the end of the ramp; `--poisson-bin`, 0.1 Å).
+  - Inside the scan (`make_md_step(poisson=...)`, carry `pois`), every N-th
+    step adds the point charges and the induced μ_z per z bin, and the
+    electrode charges per site.
+  - Point charges and dipoles are assigned to the two nearest bin centres
+    linearly (cloud-in-cell). Nearest-bin assignment moves each charge by up
+    to dz/2, which shifts the potential drop: on `md-input3` it read 1.984 V
+    at 2 V (−0.8 %).
+  - `poisson.profile_binned` turns the sums into ρ(z) (mobile, electrode
+    Gaussian marginals, bound −dP_z/dz), E(z) and Ψ(z). The driver writes
+    `<out>_poisson.csv` at the end and at every restart, and logs the drop
+    between the electrode interiors (all layers but the one facing the
+    electrolyte) against ΔV.
+- **Speed of the coupled solve.** Measured in one process, alternating
+  100-step NVE chunks (`md-input3`, polarizable, 2 V, tolpol 1e-9), and per
+  operator inside a 20-iteration `fori_loop`, which removes the ~1.3 ms
+  launch floor a standalone call shows:
+
+  | | before P4 | P4 |
+  |---|---|---|
+  | one Schur application C Ã⁻¹ Cᵀ μ | 6.2 ms | 3.1 ms |
+  | real-space part of one C q | 1.43 ms | 0.18 ms |
+  | MD, coupled constant potential | 69.3 ms/step | **63.8 ms/step** |
+  | MD, polarizable with fixed electrode charges (reference) | 44.2 | 44.1 |
+
+  - The gain is the padding. The electrode–electrolyte pair list has 30 %
+    spare slots, and they all pointed at atom 0 and electrode site 0, so
+    every scatter over the pairs (C q, its transpose, b, the charge forces)
+    piled ~200 k zeros into one row. Unused slots now hold out-of-range
+    indices, and the gathers whose transposes are scatters use
+    `mode='fill'`, so the scatters drop them. This is the same fix as for the
+    bulk pair kernels (2026-11-17, 46.2 → 32.9 ms/step).
+  - The k-space part of C now spreads only the electrode charges, whose
+    B-spline stencils are built once (the electrodes are frozen), and
+    interpolates the field only at the 11,960 polarizable sites, whose
+    stencils are built once per step (`cpm.prep_coupling`, `pme.stencil /
+    spread / potential_grid / field_from_grid`). It equals the full pass to
+    3e-17 relative, and Cᵀ to 2e-16. It makes one Schur application 20 %
+    cheaper in a loop, but the MD step does not get measurably faster (64.0
+    vs 63.8 ms/step). `cpm.cfield_full` keeps the full-pass form for the
+    checks.
+  - What remains (~20 ms/step over fixed charges): about 3.6 Schur
+    applications per step (2.6 PCG products + the initial residual), C q₀
+    for the right-hand side, the final Cᵀμ, the stencils and the real-space
+    electrode–dipole force. Every one of them is needed for the solve to be
+    the exact minimum that the Hellmann–Feynman forces assume.
+- **Validation** (`gomd/tests/check_cpm_p4.py`; `md-input3`, polarizable,
+  2 V, tolpol 1e-12, coupled solve):
+  1. the restricted coupling equals the full PME pass: C q to 5e-15 and Cᵀμ
+     to 3e-15 relative; the step energy is identical, forces agree to 3e-13
+     kcal/mol/Å and charges to 3e-16 e;
+  2. dW/ds = −Ψ_full·q(s) at fixed positions, by central differences in s
+     (charges and dipoles re-solved), to 4.6e-7 relative at s = 0.25 and
+     0.75: the identity behind W_psi;
+  3. the layer charges add up to the electrode totals (2e-16 e);
+  4. the scan's Poisson accumulator after one step gives the same Ψ(z) as
+     `poisson.profile` on that configuration, to 1.5e-13 V over 2,050 bins;
+  5. NVE through a 0 → 2 V ramp over 40 steps (80 steps in all): TE falls by
+     10.26 kcal/mol (20-step means at the start and end), W_psi = 11.46, and
+     TE + W_psi moves by +0.02. Step to step it spreads 1.94 kcal/mol, the
+     same as TE alone after the ramp.
+  - Linear assignment also tightened the P2/P3 Poisson checks (one
+    configuration, 2 V): 1.9999 V (was 2.0033) and, with dipoles, 1.9997 V
+    (was 2.0031).
+- **MD** (`md-input3`, classical, 2 V, NVE, 0.1 ps ramp in a 0.2 ps run,
+  nearest-bin Poisson assignment):
+  - TE falls by 6.7 kcal/mol over the ramp; the source does
+    W_psi = 6.06 kcal/mol; TE + W_psi stays within ±0.8 kcal/mol, the band of
+    the run without a ramp;
+  - the electrode charges grow from ±0.045 e (step 0, Ψ = 0) to ±0.20 e at
+    the end of the ramp;
+  - almost all the charge sits on the layer facing the electrolyte (−0.233 e
+    of −0.221 e on the lower electrode, with +0.012 e on the next layer);
+  - 16.0 ms/step, the same as without the P4 output.
+- **MD** (`md-input3`, polarizable, coupled, 2 V, NVE, 0.05 ps ramp in a
+  0.2 ps run, `main_scan`, linear Poisson assignment):
+  - TE + W_psi stays within 3631.2–3632.6 kcal/mol through and after the
+    ramp, while TE falls by about 10 and W_psi reaches 11.98;
+  - the electrode charges grow from ±0.042 e to ±0.42–0.49 e;
+  - the time-averaged Poisson drop over 61 samples after the ramp is
+    1.9998 V at 2 V (−0.01 %);
+  - 2.63 PCG products per step; 63.4–64.8 ms/step once the GPU left its slow
+    clock state (113 ms/step for the first 160 steps).
+
+### 4.27 Constant potential with induced dipoles (P3, 2026-11-19)
+- **One energy:**
+  W(q, μ) = W_P2(q) + ½ μ·(α⁻¹ − arf − T)·μ − μ·(E_ff + C q)
+  is minimised jointly in q and μ, at fixed total electrode charge.
+  - C q is the field of the electrode charges at every site:
+    - the PME pass with q on the electrode sites (k-space + planar);
+    - the real-space Gaussian part −q v′(r) r̂ over the electrode–electrolyte
+      pairs, with v = [erfc(αr) − erfc(ηr)]/r and no Thole damping.
+  - Cᵀμ, the potential at the electrode sites from the dipoles, is `jax.vjp`
+    of the same map. So the two directions are exact transposes and the
+    coupled matrix stays symmetric. This is the consistency that two
+    separately written forces, as in OpenMM's AMOEBA with constant
+    potential, do not have.
+- **Solve** (`cpm.coupled_solve`). q is eliminated exactly:
+  - q(μ) = q₀ + Ã⁻¹Cᵀμ, with q₀ the P2 charges (μ = 0) and Ã⁻¹ the inverse
+    on the fixed-charge subspace;
+  - PCG solves (α⁻¹ − arf − T − C Ã⁻¹ Cᵀ) μ = E_ff + C q₀, through
+    `solve_scf_pcg(extra_op=...)`. Every product applies the Schur term
+    with one C and one Cᵀ;
+  - the energy is −½ COULOMB (E_tot·μ + μ·r), with E_tot·μ =
+    E_rhs·μ + dq·Cᵀμ;
+  - the ASPC predictor warm-starts μ as before.
+- **Forces** (Hellmann–Feynman at fixed q, μ):
+  - the P2 charge forces with the final q;
+  - the usual dipole forces on the k-space tables built with all charges
+    (`qmu_grad` with the electrode charges included);
+  - −COULOMB ∇ of the real-space electrode–dipole energy
+    (`edip_energy_real`, by `jax.grad`).
+- **Driver:** `main_scan --polarizable --cpm-dv V` (PCG required).
+  `make_md_step(pol_parts=...)` routes the polarizable term through the
+  coupled solve.
+- **Validation** (`gomd/tests/check_cpm_pol.py`; `md-input3`, 2 V,
+  tolpol 1e-12; all pass):
+  1. coupled solve = an alternating solve (dipoles at fixed q, then q at
+     fixed dipoles): charges to 5e-9 e, dipoles to 1.3e-6 e Å, the tolpol
+     level. That takes 11 PCG products, against 57 full alternations.
+  2. the dipole equation holds against a field rebuilt without the coupling
+     operator (fresh PME with the final charges + numpy Gaussian field):
+     max |α(E_tot − Aμ)| 5.8e-7.
+  3. forces = −dW/dx by central differences with q and μ re-solved at every
+     displacement, to 1.1e-5 relative. Checked on atoms 2 Å from the
+     electrode and 66 Å away.
+  4. Poisson profile with the dipoles' bound charge: a 1.9997 V drop at 2 V
+     (−0.01 %; 2.0031 V with the nearest-bin assignment used before P4).
+     Without the dipoles in ρ it would be 6.76 V, so Cᵀ carries
+     the physics.
+  - The default pair kernel sums its energy over 7.7 M pairs in fp32: the
+    energy moves in about 5e-4 kcal/mol steps, too coarse for central
+    differences at 1e-4 Å, though its forces equal the fp64 ones. The check
+    therefore uses the fp64 kernel. Per term, all fp64 classical pieces pass
+    finite differences on `md-input3` to ≤1.2e-6.
+- **MD** (`md-input3`, polarizable, 2 V, NVE, 200 fs, tolpol 1e-9):
+  - TE stays within ±0.9 kcal/mol with no drift, the same band as without
+    electrodes;
+  - 2.60 PCG products per step, against 2.38 without electrodes;
+  - electrode charges ±0.43–0.51 e, against ±0.21 e for the non-polarizable
+    electrolyte and ±0.45 e at step 0;
+  - about 69 ms/step at P3, against 44 without constant potential; 64
+    ms/step since P4 (§4.28).
+
+### 4.26 `cpm.py` — constant-potential electrodes (P2, 2026-11-18)
+- **Model** (Siepmann & Sprik 1995; Reed, Lanning & Madden 2007): every
+  electrode site carries a Gaussian charge q (η = 1.979 Å⁻¹ by default,
+  `--electrode-eta`). Each step the charges minimise U − Ψ·q at a fixed total
+  (the cell is neutral), so the potential dU/dq at every site of an electrode
+  equals its Ψ. The charges are solved exactly each step; there is no lag.
+- **Setup:** `make_cpm`.
+  - A, the electrode–electrode matrix, is built once from three parts:
+    - real-space Gaussian–Gaussian pairs, [erf(ηr/√2) − erf(αr)]/r within
+      r_c;
+    - the self terms, 2(η/√(2π) − α/√π);
+    - the k-space (+ planar) response of the very PME pass the dynamics
+      uses, from unit charges vmapped in batches. That keeps the solve
+      exactly consistent with the forces.
+  - A is factored by Cholesky; A⁻¹ and A⁻¹1 are kept (3,584 sites:
+    103 MB, about 6 s).
+- **Per step** (`make_md_step(cpm=...)`; `--kspace pme` is required):
+  1. b = the PME potential of the force-field charges at the electrode sites
+     (the electrodes are at zero there), plus the real-space
+     electrode–electrolyte part [erfc(αr) − erfc(ηr)]/r over the
+     electrode–electrolyte pairs, compacted from the neighbor list each
+     step.
+  2. q = A⁻¹(Ψ − b) − A⁻¹1·(1ᵀA⁻¹(Ψ − b) − Q)/(1ᵀA⁻¹1).
+  3. A second PME pass with all charges, plus the real-space
+     electrode–electrolyte term, ½ qᵀA_real q and −Ψ·q.
+  - Forces are Hellmann–Feynman (Coulomb at fixed q). The reported PE is
+    U − Ψ·q, the conserved quantity.
+- **Driver:**
+  - `main_scan --cpm-dv V` sets Ψ_upper − Ψ_lower. The lower electrode is at
+    −dV/2 and the upper at +dV/2, or `--cpm-psi-lower` sets the lower one.
+  - Needs the electrodes and `--slab-height`. Refused with `--polarizable`
+    until P3.
+  - The log adds Q_lower / Q_upper columns. Overflowing electrode–electrolyte
+    pairs stop the run.
+- **Units:** Ψ is converted with 23.0605 kcal/mol/e per V. APPLE&P's Coulomb
+  constant is 332.08, against CODATA's 332.0637, so the model's volt is
+  5.1e-5 off the physical one. Compare potentials in model units.
+- **`gomd/poisson.py`:** the laterally averaged ρ(z) is built from three
+  parts: binned point charges, the 1D marginals of the electrode Gaussians,
+  and −dP_z/dz from induced dipoles. Integrating with zero field below the
+  stack gives Ψ(z) in V.
+- **Validation** (`gomd/tests/check_cpm.py`, all pass):
+  1. charges solved on the GPU, potentials evaluated by the exact 2D Ewald
+     reference: φ − Ψ is the same on every electrode site to 5.6e-9 V
+     (small cell, 144 Gaussian sites and 12 points);
+  2. gauge: (−½, +½) V and (0, 1) V give the same charges to 4e-16 e;
+  3. forces on the electrolyte at the solved charges = reference to
+     7.5e-6 kcal/mol/Å;
+  4. finite differences of W = U − Ψ·q, with the charges re-solved at every
+     displacement = the Hellmann–Feynman force to 6e-8 kcal/mol/Å;
+  5. `md-input3` empty capacitor at 1 V: Q = 0.059559 e against A·ΔV/(4πd) =
+     0.059371 e (+0.32 %; Reed et al. +0.18 %). The inner layer carries
+     105.2 % of the electrode charge; the layers behind it alternate
+     −5.5 %, +0.29 %, −0.01 %, the metallic screening pattern of Siepmann &
+     Sprik's Table II;
+  6. a +1 e charge at z = d/4 between grounded electrodes induces
+     −0.7508 / −0.2492 e (images: −0.75 / −0.25); at d/2, −0.5000 / −0.5000;
+  7. Poisson profile of one `md-input3` configuration at 2 V: a 1.9999 V
+     drop between the electrode interiors (−0.00 %; 2.0033 V with the
+     nearest-bin assignment used before P4), flat to 0.2 mV inside
+     each electrode.
+- **MD** (`md-input3`, classical APPLE&P, slab 205 Å, PME, ΔV 2 V, NVE,
+  200 fs):
+  - U − Ψ·q + KE stays within ±0.8 kcal/mol with no drift.
+  - The electrode charges grow from ±0.164 e to about ±0.23 e as the double
+    layer forms; the empty capacitor would hold ±0.119 e.
+  - 15.7 ms/step on the RTX 5070, against 16.4 ms/step for the same run
+    without constant potential. The second PME pass, the
+    electrode–electrolyte pairs and the 3,584² matvec cost nothing
+    measurable, within the GPU's clock noise.
+
+### 4.25 `forces/pme.py` — smooth particle-mesh Ewald (2026-11-18)
+- **What:** `make_recip_pme(box, q, alpha, spacing=1.0, order=6, slab)` is
+  SPME (Essmann et al. 1995) with the same interface as
+  `recip_shared.make_recip`, so the classical force, the SCF field and the
+  charge–dipole force use it unchanged. `rt` also carries `phi`, the
+  reciprocal (+ planar) potential at each site, and the charges can be
+  passed per call; both are for the constant-potential electrodes.
+- **How:**
+  - Cardinal B-spline spreading, FFT convolution with B(m)·C(m), and
+    interpolation of φ and E.
+  - force = q E, which is exactly −∂E/∂x of the SPME energy.
+  - `qmu_grad` is the autodiff of Σ μ·E through the same discrete pipeline,
+    so it is exactly consistent with the field the SCF uses. There is no
+    hand-written dipole spreading.
+  - The slab planar term is as in `recip_shared`.
+- **Driver:**
+  - `main_scan --kspace auto|explicit|pme` (`--pme-spacing`, default 1.0 Å;
+    `--pme-order`, default 6).
+  - `auto` picks PME when electrodes are set and the explicit-k sum
+    otherwise, so bulk runs keep the reference code's k-space.
+  - `--reference-parity` forces explicit.
+- **Gaussian electrode charges enter k-space as points.** Their width is an
+  exact short-ranged real-space correction, −erfc(ηr)/r: energy and forces
+  agree to 4e-15 with the Gaussian-factor form; site potentials agree up to
+  a uniform constant.
+- **Validation:**
+  - `gomd/tests/check_pme.py`, 300 random charges, slab and bulk:
+    - at 0.5 Å / order 8, PME = converged explicit-k to 4e-9 (energy) and
+      5e-10 (field), with errors falling steadily with spacing and order;
+    - force = −∇E to 8e-14;
+    - `qmu_grad` = analytic explicit-k to 3e-9.
+  - Self-test check 8b (`md-input`): PME 1.0 Å / order 8 = explicit-k
+    14/14/14 to 3e-7. The self-test is now 15/15.
+- **Accuracy and cost on the `md-input3` slab** (α 0.23, vs explicit
+  11/11/66; table in `md-output/kspace_convergence_pme_md-input3.txt`).
+  The GPU time is one pass with energy, force and the Q–μ gradient on the
+  RTX 5070.
+
+  | k-space | F rms / max (kcal/mol/Å) | electrode φ rms / max | GPU |
+  |---|---|---|---|
+  | explicit 7/7/25 | 0.035 / 0.40 | 3.4 / 10.6 mV | 20–40 ms |
+  | explicit 8/8/35 | 0.0022 / 0.036 | 0.18 / 0.60 mV | 70–84 ms |
+  | PME 2.0 Å p6 (18×18×108) | 0.0009 / 0.021 | 0.014 / 0.077 mV | 2.7 ms |
+  | PME 1.5 Å p6 (24×24×144) | 0.0001 / 0.0026 | 0.002 / 0.016 mV | 2.9 ms |
+  | PME 1.0 Å p6 (36×36×216), default | <1e-4 / 0.0002 | 0.0001 / 0.0008 mV | 3.5 ms |
+  | PME 1.0 Å p8 | <1e-4 / <1e-4 | ~0 | 5.6 ms |
+- **MD:**
+  - `md-input3` slab, polarizable NVE over 200 fs with PME: TE within
+    ±1 kcal/mol; 44 ms/step, vs 57–67 with explicit 7/7/25.
+  - Bulk `md-input`: about even, 22.5–24.4 vs 21.7 ms/step, with a
+    standalone pass of 2.6 vs 3.6 ms.
+  - The laptop GPU switches between two clock states (bulk: ~22 vs
+    ~34 ms/step), so compare timings only within a run, or alternate runs.
+- **Harness note:** the WSL VM has 7 GB of RAM. Scoring several large k-space
+  settings in one process gets the process killed, so
+  `kspace_convergence.py --cache` stores the prepared cell and the reference
+  for one-setting-per-process runs.
+
+### 4.24 Slab electrostatics: 2D Ewald (constant-potential task, P1, 2026-11-18)
+- **`forces/ewald2d_ref.py`**: fp64 numpy references for point and Gaussian
+  charges, for small N. Each returns the energy, the potential at each site
+  (dU/dq, which a constant-potential electrode needs) and the forces.
+  - **`ewald2d_exact`:** the 2D Ewald sum (Hu, JCTC 2014 eqs 37–39) with
+    Gaussian charges as in Reed et al. 2007 (eq A31).
+    - Pair smearings: 1/σ² = 1/α² + 1/η_i² + 1/η_j².
+    - Unlike Reed's A31, the real-space kernel keeps the full
+      erf(s r)/r − erf(σ r)/r. For graphite (C–C 1.41 Å, η 1.979 Å⁻¹) the
+      term Reed drops is 0.6 % at nearest neighbours.
+  - **`ewald3dc` / `recip3d`:** the 3D sum in a box taller than the slab plus
+    the planar dipole term 2π M_z²/V. This is the trapezoid rule for the
+    2D sum's k_z integral.
+- **GPU path:** `recip_shared.make_recip(..., slab=True)` adds the planar term.
+  - Energy: + 2π M_z²/V, with M_z = Σ q z.
+  - The field gets a uniform −4π M_z/V in z, so the classical force, the
+    SCF field and the charge–dipole energy all carry it.
+  - `qmu_grad` gets −4π q_l Σ μ_z / V.
+  - Induced dipoles do not enter M_z: APPLE&P's μ–μ interaction is real-space
+    only (RF/taper), so it has no k = 0 term.
+- **Driver:**
+  - `main_scan --slab-height` turns the planar term on; `--no-planar-term`
+    turns it off, for comparisons.
+  - `--kmax kx,ky,kz` overrides the k-limits; restarts keep them.
+  - The log names the k-space mode.
+- **Validation** (`gomd/tests/check_ewald2d.py`; 184 sites: 4 Gaussian layers
+  plus 40 points, in a 12 × 13 Å cell):
+  - exact 2D sum independent of α (0.3 / 0.4 / 0.5): energy, site potentials
+    and forces to 2e-15;
+  - isolated Gaussian–Gaussian and point–Gaussian pairs in a 300 Å cell:
+    analytic energy to the predicted lateral-image term (1.5e-6);
+  - 3D sum + planar term vs exact, as the vacuum gap grows (Lₓ 12 Å):
+
+    | gap | 18 Å | 24 Å | 36 Å | 48 Å |
+    |---|---|---|---|---|
+    | max dF | 5e-7 | 3e-8 | 7e-11 | 2e-13 |
+
+    This tracks exp(−2π·gap/Lₓ). Without the planar term the error stays at
+    6e-2.
+  - GPU pass = numpy reference to 2e-13 kcal/mol/Å; force = −∇E; `qmu_grad`
+    = autodiff.
+  - For `md-input3` (Lₓ 33.8 Å) the 76.8 Å gap of the 205 Å slab puts the
+    image error near exp(−14).
+- **k-space convergence on the `md-input3` slab** (α 0.23, reference
+  11/11/66; `gomd/tests/kspace_convergence.py`, table in
+  `md-output/kspace_convergence_md-input3.txt`):
+
+  | kmax | k-vectors | dE (kcal/mol) | F rms / max (kcal/mol/Å) | field rms (V/Å) | electrode φ rms / max | GPU pass |
+  |---|---|---|---|---|---|---|
+  | 7/7/25 (input, scaled) | 2,535 | −14.0 | 0.035 / 0.40 | 5e-3 | 3.4 / 10.6 mV | 36 ms |
+  | 8/8/35 | 4,645 | −0.80 | 0.0022 / 0.036 | 3e-4 | 0.18 / 0.60 mV | 70 ms |
+  | 9/9/45 | 7,639 | −0.028 | 0.0001 / 0.0015 | 9e-6 | 0.004 / 0.015 mV | does not fit 8 GB |
+
+  - The real-space cutoff error at α 0.23 and 12 Å is roughly 0.005
+    kcal/mol/Å (Kolafa–Perram estimate; erfc(α r_c) = 9.5e-5). That makes
+    8/8/35 the balanced choice.
+  - In a full polarizable step on the 8 GB RTX 5070, 8/8/35 does not fit:
+    each (sites × k) fp64 table is 652 MB and the pass keeps several. It
+    needs Colab (L4 / A100) until the pass is made memory-lean (k-chunked or
+    PME).
+- **NVE in the slab with the planar term** (7/7/25, 200 fs): TE within
+  3640.3–3642.2 kcal/mol, the same band as without it.
+  - With neutral electrodes the term is small (0.02 kcal/mol at step 0).
+  - It will dominate once the electrodes carry charge: ±5 e, 108 Å apart,
+    gives about 2,500 kcal/mol.
 
 ### 4.23 `electrodes.py` — fixed electrodes (constant-potential task, P0, 2026-11-18)
 Sets up an electrode | electrolyte | electrode cell with both electrodes held
@@ -1015,16 +1397,13 @@ lone-pair redistribution vs the chain rule 2e-16.
 
 ## 7. Performance — measurements and findings
 
-| Stage | V100 ms/step |
-|-------|--------------|
-| Host-loop driver, recompile every neighbor rebuild | 2253 |
-| Fixed-capacity padded pairs (no recompile) | 843 → ~810 |
-| On-device neighbor build + `lax.scan` + segsum, classical | **9.2** |
-| Same, full polarizable | **53–58** (56 avg) |
+All current numbers are from the RTX 5070 Laptop GPU (8 GB, local WSL). Its
+clocks switch between two states (bulk polarizable: ~22 vs ~34 ms/step), so
+compare only runs made back to back, or alternate them.
 
-RTX 5070 Laptop (8 GB, local WSL), polarizable NVE, 2,000 steps, tolpol 1e-8,
-with neighbor rebuilds on drift (159 in 2,000 steps). Energy conservation is
-the same in every row (2026-11-17):
+**Bulk `md-input`** (8,716 sites), polarizable NVE, 2,000 steps, tolpol 1e-8,
+neighbor rebuilds on drift (159 in 2,000 steps). Energy conservation is the
+same in every row (2026-11-17):
 
 | Stage | ms/step |
 |-------|---------|
@@ -1035,10 +1414,37 @@ the same in every row (2026-11-17):
 | + per-step compaction to pairs inside rcut + 0.05 Å | 27.8 |
 | + one shared k-space pass | 27.6 |
 | + induced-force erfc/exp from the reference tables | **21.6** |
-| classical force field, same run settings | 6.6 |
+| classical force field, same run settings | **6.6** |
 
-Laptop GPU clocks vary by up to ±50% between runs; compare runs made back to
-back.
+With PME instead of explicit k-space the bulk step is about even (22.5–24.4
+vs 21.7 ms/step); explicit k stays the bulk default.
+
+**Electrode slab `md-input3`** (17,544 sites, 205 Å slab, PME 1 Å / order 6,
+NVE, 200 fs, 2026-11-18/19):
+
+| Run | ms/step |
+|-----|---------|
+| classical, fixed electrode charges | 16.4 |
+| classical, constant potential at 2 V | **15.7** |
+| polarizable, fixed electrode charges | **44** (57–67 with explicit k 7/7/25) |
+| polarizable, constant potential at 2 V, tolpol 1e-9 | **64** (69 before P4) |
+| old Fortran code, 40 MPI ranks | ≈225 |
+
+The constant-potential solve itself is free in the classical run (one extra
+PME pass, a 3,584² matvec). Coupled to the dipoles it costs about 20 ms/step
+(25 before P4 dropped the padded slots of the electrode–electrolyte pair
+list): two PME-sized operations per Schur application, about 3.6
+applications per step (§4.28).
+
+**History: the earlier engine on the OSC Pitzer V100** (200-step runs, before
+the 2026-11-16 defaults; not re-measured since):
+
+| Stage | V100 ms/step |
+|-------|--------------|
+| Host-loop driver, recompile every neighbor rebuild | 2253 |
+| Fixed-capacity padded pairs (no recompile) | 843 → ~810 |
+| On-device neighbor build + `lax.scan` + segsum, classical | 9.2 |
+| Same, full polarizable (Jacobi SCF) | 53–58 (56 avg) |
 
 Findings:
 1. **The 800 ms/step was the host neighbor build**, not the force kernels:
@@ -1047,14 +1453,19 @@ Findings:
 2. **fp32 alone did nothing** (810 → 807) while the scatter was atomic and
    fp64: the pair kernel is gather/scatter-bound. fp32 pays off together with
    the `segment_sum` scatter.
-3. The old CPU-sandbox breakdown (pair 67%, reciprocal 32%) does not carry to
-   the GPU. **Profile the polarizable step per phase on the V100** before any
-   further work; FFT-PME waits for that profile.
+3. **Padding and scatters dominated the GPU step**, not arithmetic. The
+   per-phase profile on the RTX 5070
+   (`md-output/profile_polarizable_RTX5070_20261117b.txt`) showed the padded
+   `(0,0)` slots and the serialized neighbor-build scatter as the largest
+   costs; dropping them gave 46.2 → 27.8 ms/step.
+4. After those fixes the reciprocal-space passes were the largest group
+   (~15 ms per evaluation); XLA already shared most of their work, so one
+   shared pass saved only 0.2 ms.
 
-Likely next levers (to confirm by profile): a contracting SCF solver (fewer
-iterations, and makes ASPC safe), sharing pair geometry between the field,
-SCF and force passes, and the k-space cos/sin used by both the reciprocal force
-and the reciprocal field.
+Next levers: nothing large is left without a change of method: fewer SCF
+products per step, or a learned SCF (roadmap step 3). For the coupled
+constant-potential step the Schur applications are the floor of an exact
+solve (§4.28).
 
 ---
 
@@ -1134,18 +1545,23 @@ cross-checks it against the CPU path.
 
 - Done:
   - classical and fully polarizable APPLE&P MD on the GPU, validated against
-    the reference (9.2 / ~56 ms/step on the V100 before the 2026-11-16
-    defaults);
+    the reference (6.6 / 21.6 ms/step on the RTX 5070 laptop for
+    `md-input`);
+  - PCG SCF with a predicted start, per-phase GPU profile, PME;
   - NVT;
-  - MLIP provider with PFF/MLIP comparison and MLIP-driven dynamics.
+  - MLIP provider with PFF/MLIP comparison and MLIP-driven dynamics, UMA
+    validated on a Colab L4;
+  - constant-potential electrodes P0–P4 (fixed electrodes, slab Ewald, PME,
+    constant potential coupled to the induced dipoles, voltage ramp, charge
+    and Poisson output; §4.23–4.28).
 - Next engine work:
-  - UMA on a Colab GPU (memory, speed, `omol` vs `omc`);
-  - per-phase GPU profile with the new defaults;
-  - a contracting SCF solver;
+  - constant potential: production EDL runs on Colab; the open questions in
+    PROJECT_STATUS 1b (the old code's charge-update "rate", the slab
+    dispersion correction);
   - a virial, then NPT;
-  - an induced-force check against the polarization functional.
+  - UMA `omol` vs `omc`.
 - Roadmap:
-  - step 2: constant-potential EDL;
+  - step 2: constant-potential EDL (engine side in progress, above);
   - step 3: ML replaces `solve_scf`;
   - step 4: ML/MM — the hybrid PFF/MLIP region (subtractive ONIOM first) on
     top of the provider interface.

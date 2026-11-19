@@ -2,8 +2,11 @@
 
 _GOMD (GPU-accelerated Open MD): a from-scratch JAX/GPU engine for the APPLE&P
 polarizable force field (PEO + Li⁺ + FSI⁻, 8,716 sites = 7,400 atoms + 1,316
-lone-pair sites). Platforms: Google Colab GPUs (`GOMD_colab.ipynb`) and OSC
-Pitzer V100 (conda env `newenv2`, JAX 0.4.13, Python 3.8). The reference
+lone-pair sites), now also graphite electrodes at constant potential
+(`md-input3`, 17,544 sites). Platforms: an RTX 5070 Laptop GPU under local WSL
+(`tools/wsl_run.sh`, env `gomd`) and Google Colab GPUs (`GOMD_colab.ipynb`);
+the code still keeps to the Python 3.8 grammar of the older OSC Pitzer V100
+environment. The reference
 Python package in `pkg/` is the ground truth; each milestone is checked against
 it, and where GOMD departs from it on purpose the difference is a switch
 (`--reference-parity`)._
@@ -16,8 +19,9 @@ cold. Technical detail lives in `GOMD_DOCUMENTATION.md`.
 ## Roadmap
 
 1. Efficient MD engine (classical + polarizable)  — DONE
-2. Constant-potential EDL simulations             — task 3: design agreed, P0 (fixed
-                                                    electrodes) done 2026-11-18
+2. Constant-potential EDL simulations             — task 3: P0–P4 done and validated
+                                                    2026-11-18/19 (engine side);
+                                                    open questions in OPEN 1b
 3. ML replaces the polarization SCF               — not started (SCF seam is ready)
 4. Full ML/MM                                     — MLIP provider DONE (UMA alongside the
                                                     PFF, or driving the dynamics);
@@ -32,12 +36,25 @@ cold. Technical detail lives in `GOMD_DOCUMENTATION.md`.
 | M1 scaffold | pytree state, velocity Verlet (scaffold code since retired) |
 | M2 classical engine | splined pair, bonded, explicit-k Ewald, Jacobi SHAKE, lone-pair sites; PE 6.7e-10, F 1.4e-10 vs reference |
 | M3 polarization in the loop | field 1.4e-15, dipoles 2.8e-15, E_pol 1.2e-11, induced forces 8.0e-9; initial PE −3611.5363 vs −3611.5355 |
-| M4 performance | on-device neighbor list, `lax.scan` loop, fp32 `segment_sum` pair kernel |
-| M5 ensembles + MLIP | NVT (Nose–Hoover chain) matching the reference; MLIP provider (UMA via fairchem, own process); PFF/MLIP comparison; Colab runner; `gomd.selftest` |
+| M4 performance | on-device neighbor list, `lax.scan` loop, fp32 `segment_sum` pair kernel, PCG + predicted SCF start, PME |
+| M5 ensembles + MLIP | NVT (Nose–Hoover chain) matching the reference; MLIP provider (UMA via fairchem, own process; validated on a Colab L4); PFF/MLIP comparison; Colab runner; `gomd.selftest` |
+| M6 constant potential (P0–P3) | fixed electrodes, slab Ewald (EW3DC), PME, constant-potential charges, coupled to the induced dipoles; see OPEN 1b |
 
-V100, 200-step runs: **9.2 ms/step classical** (from ~800), **53–58 ms/step
-polarizable** (56 average). Not yet re-timed with the 2026-11-16 defaults or
-on Colab GPUs.
+Speed on the RTX 5070 Laptop GPU (2026-11-17 to 11-19; the GPU has two clock
+states, so compare runs made back to back):
+
+| System | Force field | ms/step |
+|--------|-------------|---------|
+| `md-input` (8,716 sites) | classical | **6.6** |
+| `md-input` | polarizable, PCG + predict, tolpol 1e-8 | **21.6** (103 at the start of 2026-11-17) |
+| `md-input3` (17,544 sites, slab, PME) | classical, constant potential 2 V | **15.7** |
+| `md-input3` | polarizable, fixed electrode charges | **44** |
+| `md-input3` | polarizable, constant potential 2 V | **64** (69 before P4) |
+
+The old Fortran code ran `md-input3` at about 225 ms/step on 40 MPI ranks. The
+V100 figures in earlier versions of this file (9.2 / 56 ms/step) were the
+engine before 2026-11-16 and are kept only as history
+(`GOMD_DOCUMENTATION.md` §7).
 
 Key fixes along the way: the 800 ms/step was the ~4.5 s host neighbor build,
 not the force kernels; SHAKE must constrain against the post-drift position;
@@ -160,15 +177,58 @@ errors.
 
    **Phases:**
    - ~~P0 fixed electrodes~~: done, see the change log and doc §4.23.
-   - P1: slab electrostatics (planar dipole term, Gaussian kernels, exact
-     2D reference). This includes choosing α / kmax for a converged k-space;
-     the input's α 0.23 with kmax 7/7/16 is loose.
-   - P2: constant potential without polarization: capacitor, image-charge
-     and test-charge checks, gauge invariance, NVE, Poisson drop = ΔV.
-   - P3: coupling with polarization: forces vs finite differences of the
-     minimized energy, and the α → 0 limit.
-   - P4: production: ΔV ramp, per-electrode charge output, Poisson tool,
-     performance.
+   - ~~P1 slab electrostatics~~: done, see doc §4.24.
+     - Planar dipole term on the GPU; exact 2D Ewald and trapezoid
+       references with Gaussian charges.
+     - k-space measured on `md-input3`: 7/7/25 gives 0.035 kcal/mol/Å force
+       error and 3.4 mV rms on the electrode potentials; 8/8/35 gives 0.002
+       and 0.2 mV. 8/8/35 needs more than the laptop's 8 GB (Colab, or a
+       leaner k-space pass, P4).
+     - The Gaussian sites are in the numpy references only. The GPU pass
+       gets them in P2, with per-step electrode charges.
+   - ~~P2 constant potential without polarization~~: done, doc §4.26.
+     - Exact per-step solve with A⁻¹ built from the dynamics' own PME;
+       `main_scan --cpm-dv`.
+     - All 7 checks pass:
+       - constant potential under the exact reference to 6e-9 V;
+       - gauge invariance;
+       - forces and Hellmann–Feynman forces;
+       - capacitor within 0.32 %; image split within 0.1 %;
+       - Poisson drop = ΔV within 0.16 %.
+     - NVE at 2 V conserves U − Ψ·q + KE.
+   - ~~P3: coupling with polarization~~: done, doc §4.27.
+     - One energy in q and μ: q is eliminated exactly inside PCG on the
+       dipoles, and C and Cᵀ are exact transposes (vjp).
+     - Checks: coupled = alternating solve; the dipole equation holds against
+       an independent field; forces = −dW/dx with re-solves (1e-5); Poisson
+       drop with dipoles 2.0031 V at 2 V (1.9997 V since P4's linear bin
+       assignment).
+     - NVE at 2 V conserves energy, at about 69 ms/step (64 since P4).
+   - ~~PME~~ (moved ahead of P2 at the user's request): done, doc §4.25.
+     Smooth PME is the k-space with electrodes. At the 1.0 Å / order 6
+     default the force error is <1e-4 kcal/mol/Å and the electrode potential
+     error 0.1 µV, for 3.5 ms. The slab runs at 44 ms/step on the laptop.
+   - P4: production features, doc §4.28 (2026-11-19):
+     - ~~ΔV ramp~~ `--cpm-ramp PS`: Ψ = sΨ_full, s from 0 at step 0 to 1. The
+       log adds the source's work W_psi = ∫Ψ_full·q ds and TE + W_psi, which
+       stays conserved: on `md-input3` (classical, 2 V over 0.1 ps) TE falls
+       6.7 kcal/mol, W_psi = 6.06, and TE + W_psi stays within ±0.8.
+     - ~~charge output~~ `<out>_charges.csv` (`--charge-every`, 10): Q_lower,
+       Q_upper and every layer's charge; the layer facing the electrolyte
+       holds nearly all of it.
+     - ~~Poisson tool~~ time-averaged in the scan (`--poisson-every`, 10;
+       from the end of the ramp), `<out>_poisson.csv`, drop vs ΔV in the log.
+       Charges are assigned to the bins linearly: nearest-bin assignment gave
+       1.984 V at 2 V; linear gives 1.9998 V (polarizable, 61 samples).
+     - ~~speed of the coupled solve~~: 69 → 64 ms/step (fixed charges: 44).
+       The gain is the padded slots of the electrode–electrolyte pair list,
+       which all scattered into atom 0. They are now dropped, and one Schur
+       application costs 3.1 ms instead of 6.2. Restricting the PME
+       part to the electrode sources and the polarizable targets is exact
+       but changes MD speed by less than the noise. The remaining ~20 ms is
+       ~3.6 Schur applications per step, the floor of an exact solve.
+     - Checks: `gomd/tests/check_cpm_p4.py` 5/5; `check_cpm` 7/7 and
+       `check_cpm_pol` 4/4 re-run; self-test 15/15.
 
    **Open questions for the user:**
    1. How did the old code update the charges: an exact solve, fictitious
@@ -249,6 +309,169 @@ there, and copies md-output/ back.
 ---
 
 ## Change log
+
+### 2026-11-19 — constant potential P4: ramp, charge and Poisson output, faster coupling; docs re-timed
+**Code:**
+- `cpm.solve / charge_terms / step / coupled_solve` take a potential scale;
+  `make_md_step(cpm_ramp_steps=...)` sets s = min(1, step / N) and reports
+  `psi_scale`; `main_scan --cpm-ramp PS` logs `dV`, `W_psi` and `TE+W_psi`
+  (or `H_ext+W`).
+- Per-layer electrode charges in the step (`cpm_layer_id`), written with the
+  totals to `<out>_charges.csv` (`--charge-every`, 10).
+- Time-averaged Poisson accumulation in the scan carry (`poisson=`, linear
+  bin assignment); `poisson.profile_binned`; `<out>_poisson.csv` and the
+  drop vs ΔV in the log (`--poisson-every`, 10; `--poisson-start`;
+  `--poisson-bin`, 0.1 Å). `poisson.profile` now also assigns linearly.
+- Cross-pair padding: unused slots of the electrode–electrolyte list hold
+  out-of-range indices, and the gathers whose transposes are scatters use
+  `mode='fill'`, so no scatter piles zeros into atom 0.
+- Restricted PME for the electrode–dipole coupling (`pme.stencil / spread /
+  potential_grid / field_from_grid`, `cpm.prep_coupling`, `cpm.cfield`;
+  `cpm.cfield_full` keeps the full-pass form).
+
+**Checks:** new `gomd/tests/check_cpm_p4.py` 5/5:
+- restricted coupling = full pass to 5e-15;
+- dW/ds = −Ψ·q to 4.6e-7;
+- layer sums exact;
+- Poisson accumulator = `poisson.profile` to 2e-13 V;
+- TE + W_psi flat through a ramp (+0.02 vs W_psi 11.46 kcal/mol).
+
+`check_cpm` 7/7 (Poisson drop now 1.9999 V), `check_cpm_pol` 4/4 (1.9997
+V), self-test 15/15.
+
+**MD** (`md-input3`, 2 V, NVE, 0.2 ps):
+- classical, 0.1 ps ramp: TE + W_psi within ±0.8 kcal/mol, 16.0 ms/step.
+- polarizable, 0.05 ps ramp: TE + W_psi within 3631.2–3632.6 kcal/mol,
+  time-averaged Poisson drop 1.9998 V, 64 ms/step (69 before; 44 with fixed
+  charges).
+
+**Docs:** the V100 timings (9.2 / 56 ms/step, pre-2026-11-16 engine) were
+still the headline numbers in both files. They are replaced by the RTX 5070
+numbers (bulk 6.6 / 21.6 ms/step, slab and constant-potential runs) and kept
+as history in doc §7. The M6 milestone and the roadmap are brought up to date.
+
+### 2026-11-19 — constant potential P3: electrode charges coupled to induced dipoles
+**Code:**
+- `gomd/cpm.py`:
+  - the per-step pieces are split (`prep`, `solve`, `charge_terms`);
+  - `cfield` is C, the field of the electrode charges (PME + real-space
+    Gaussian part), with Cᵀ taken by `jax.vjp`;
+  - `dq_from_phi` gives Ã⁻¹ on the fixed-charge subspace;
+  - `edip_energy_real` gives the real-space electrode–dipole energy;
+  - `coupled_solve` eliminates q exactly and runs PCG on
+    (α⁻¹ − arf − T − C Ã⁻¹ Cᵀ) μ = E_ff + C q₀.
+- `solve_scf_pcg(extra_op=...)` (static).
+- `make_md_step(pol_parts=...)` and `main_scan --polarizable --cpm-dv`.
+
+**Checks** (`gomd/tests/check_cpm_pol.py`, `md-input3` at 2 V, all pass):
+- coupled = alternating solve (11 PCG products vs 57 alternations);
+- dipole residual vs an independently built field, 5.8e-7;
+- forces = −dW/dx with q and μ re-solved, 1.1e-5 relative;
+- Poisson drop 2.0031 V with the dipoles' bound charge (6.76 V without).
+- The P2 checks and the bulk self-test (15/15) are unchanged.
+
+**Debugging note:** the first force check failed by up to 60 % for every
+variant, with or without electrodes and with or without dipoles. The default
+pair kernel sums its energy in fp32 over 7.7 M pairs (steps of ~5e-4
+kcal/mol), so finite differences at 1e-4 Å see only rounding; its forces
+equal the fp64 ones. Every fp64 classical term passes finite differences to
+≤1.2e-6. The check now uses the fp64 kernel.
+
+**MD** (polarizable, 2 V, NVE, 200 fs):
+- TE within ±0.9 kcal/mol, with 2.60 PCG products per step;
+- electrode charges ±0.43–0.51 e (±0.21 e without polarization);
+- about 69 ms/step (44 without constant potential).
+
+### 2026-11-18 — constant potential P2: electrode charges at fixed potential
+**Code:**
+- `gomd/cpm.py` (doc §4.26):
+  - Gaussian electrode charges, solved exactly each step:
+    q = A⁻¹(Ψ − b), with a Lagrange multiplier for neutrality.
+  - A is built once from real-space Gaussian pairs, the self terms and the
+    dynamics' own PME response.
+  - b is the PME potential of the electrolyte plus the real-space
+    electrode–electrolyte pairs.
+  - A second PME pass gives the forces. The PE is U − Ψ·q.
+- `gomd/poisson.py`: the laterally averaged Poisson profile, including the
+  induced-dipole bound charge.
+- `main_scan --cpm-dv / --cpm-psi-lower / --electrode-eta`; the log gains
+  Q_lower and Q_upper. Not yet with `--polarizable`, which is P3.
+
+**Checks** (`gomd/tests/check_cpm.py`, all pass):
+- potential constant under the exact reference to 5.6e-9 V;
+- gauge (−½, +½) vs (0, 1) V to 4e-16 e;
+- forces vs reference to 7.5e-6;
+- force = −dW/dx with re-solved charges to 6e-8;
+- empty capacitor +0.32 % of A·ΔV/(4πd), with the inner layer carrying
+  105 % and the layers behind it alternating;
+- image split 0.7508 / 0.2492 (theory 0.75 / 0.25);
+- Poisson drop 2.0033 V at 2 V applied.
+- The first run of check 1 failed at 5e-5 V because the test used the
+  physical V·Å/e while the model's Coulomb constant is 332.08. The test now
+  uses model units.
+
+**MD:** `md-input3` at 2 V, NVE: U − Ψ·q + KE within ±0.8 kcal/mol over
+200 fs. The electrode charges grow ±0.164 → ±0.23 e as the double layer forms.
+15.7 ms/step (classical), against 16.4 without constant potential: no
+measurable cost.
+
+### 2026-11-18 — smooth PME
+**Code:** `gomd/forces/pme.py` (doc §4.25) is SPME with the shared k-space
+interface.
+- force = q E, the exact gradient;
+- `qmu_grad` by autodiff of Σ μ·E through the same pipeline;
+- `phi` at every site, and per-call charges, for the constant-potential
+  electrodes.
+
+`main_scan --kspace auto|explicit|pme`: `auto` gives PME with electrodes and
+explicit otherwise. `--reference-parity` keeps explicit.
+
+**Checks:**
+- `gomd/tests/check_pme.py`: PME = converged explicit-k to 4e-9 at a fine
+  grid; force = −∇E to 8e-14; `qmu_grad` = analytic to 3e-9.
+- Self-test check 8b (bulk): 3e-7. The self-test is now 15/15.
+
+**On the `md-input3` slab:**
+- PME 1.0 Å / order 6 is about 300× more accurate than explicit 7/7/25 and
+  20× more than 8/8/35: force <1e-4 vs 0.035 / 0.002 kcal/mol/Å; electrode
+  φ 0.1 µV vs 3.4 / 0.2 mV.
+- It takes 3.5 ms per pass vs 20–84 ms, which brings the polarizable NVE
+  step down to 44 ms (from 57–67).
+- NVE is conserved.
+
+**Bulk:** PME and explicit 7/7/7 are about even (the pass is 2.6 vs 3.6 ms;
+the full step is within the laptop GPU's clock noise).
+
+**Also found:** Gaussian electrode charges can enter k-space as points, with
+their width as an exact short-ranged real-space correction. So PME needs no
+special electrode handling, and electrode-site potentials are defined up to a
+uniform constant, which neutrality removes.
+
+### 2026-11-18 — constant potential P1: slab electrostatics (2D Ewald)
+- **References** (`gomd/forces/ewald2d_ref.py`, fp64 numpy, point and Gaussian
+  charges): the exact 2D Ewald sum, and the 3D sum in a vacuum-padded box plus
+  the planar dipole term. Both give the energy, the potential at each site and
+  the forces.
+- **GPU:** `recip_shared` slab mode adds the planar term to the energy, the
+  field (hence the SCF and the charge–dipole energy) and `qmu_grad`.
+  `main_scan --slab-height` turns it on. New options: `--no-planar-term` and
+  `--kmax`.
+- **Checks** (`gomd/tests/check_ewald2d.py`, all pass):
+  - exact sum independent of α to 2e-15;
+  - analytic Gaussian pair energies to the predicted image term;
+  - trapezoid → exact as exp(−2π·gap/Lₓ), reaching 2e-13 at a 48 Å gap,
+    while it stays at 6e-2 without the planar term;
+  - GPU = numpy to 2e-13; force = −∇E; `qmu_grad` = autodiff.
+  - Bulk self-test still 14/14.
+- **k-space on the `md-input3` slab** (`gomd/tests/kspace_convergence.py`):
+  - the input's α 0.23 with kmax scaled to 7/7/25 leaves a force error of
+    0.035 kcal/mol/Å rms (0.40 max) and 3.4 mV rms (10.6 mV max) on the
+    electrode-site potentials;
+  - 8/8/35 cuts these to 0.002 and 0.2 mV, below the real-space cutoff's
+    error, but it runs out of memory in a full step on the 8 GB laptop
+    GPU.
+- **NVE, 200 fs, slab with planar term:** TE in the same ±1 kcal/mol band as
+  before.
 
 ### 2026-11-18 — constant potential P0: fixed electrodes, graphite cell `md-input3`
 
